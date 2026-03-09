@@ -5,247 +5,228 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Annapurna Daily Mart</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .active-nav { color: #16a34a; border-top: 3px solid #16a34a; }
+        @keyframes fadeOut { from {opacity: 1;} to {opacity: 0;} }
+        .splash-active { animation: fadeOut 1s ease-in-out 2s forwards; }
+        .view-hidden { display: none; }
+        .nav-active { color: #16a34a; font-weight: 900; }
     </style>
 </head>
-<body class="bg-gray-50 pb-32">
+<body class="bg-gray-50 overflow-x-hidden">
 
-    <div id="admin-box" class="hidden bg-slate-900 text-white p-6 fixed inset-0 z-[100] overflow-y-auto">
-        <h2 class="text-2xl font-bold mb-4 text-green-400">Add New Product</h2>
-        <input id="p-name" type="text" placeholder="Product Name" class="w-full p-3 mb-3 text-black rounded-xl">
-        <input id="p-price" type="number" placeholder="Price (₹)" class="w-full p-3 mb-3 text-black rounded-xl">
-        <select id="p-cat" class="w-full p-3 mb-3 text-black rounded-xl">
-            <option value="Grocery & Kitchen">Grocery & Kitchen</option>
-            <option value="Snacks & Drinks">Snacks & Drinks</option>
-            <option value="Beauty & Personal Care">Beauty & Personal Care</option>
-            <option value="Household Essentials">Household Essentials</option>
-        </select>
-        <input id="p-photo" type="file" accept="image/*" class="w-full p-3 mb-4 bg-slate-800 rounded-xl">
-        <button onclick="addItem()" class="bg-green-500 w-full p-4 font-black rounded-xl text-black shadow-lg mb-3">UPLOAD PRODUCT</button>
-        <button onclick="closeAdmin()" class="w-full p-3 text-red-400 font-bold border border-red-400 rounded-xl">CANCEL</button>
+    <div id="splash" class="fixed inset-0 bg-green-600 z-[200] flex flex-col items-center justify-center text-white splash-active">
+        <div class="bg-white p-5 rounded-3xl mb-4 shadow-2xl animate-bounce">
+            <i class="fa-solid fa-basket-shopping text-green-600 text-6xl"></i>
+        </div>
+        <h1 class="text-3xl font-black italic tracking-tighter">Annapurna Mart</h1>
+        <p class="mt-2 font-bold text-green-100 uppercase tracking-widest text-xs">Freshness in Minutes</p>
     </div>
 
-    <header class="bg-white p-4 sticky top-0 z-50 shadow-sm">
-        <div class="flex justify-between items-center mb-4">
-            <div>
-                <h1 onclick="openAdmin()" class="font-black text-2xl text-green-600 italic">Annapurna Mart</h1>
-                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest"><i class="fa-solid fa-location-crosshairs text-green-500"></i> Beawar, RJ</p>
-            </div>
-            <div onclick="alert('Profile section coming soon!')" class="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 border border-green-200 shadow-inner">
-                <i class="fa-solid fa-user"></i>
-            </div>
-        </div>
-        <div class="relative group">
-            <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
-            <input type="text" id="searchBar" onkeyup="searchItems()" placeholder="Search 'atta', 'oil' or 'chips'..." class="w-full bg-gray-100 p-3.5 pl-12 rounded-2xl text-sm outline-none border border-transparent focus:border-green-500 focus:bg-white transition-all">
-        </div>
-    </header>
-
-    <div id="category-container" class="space-y-6 mt-2 pb-10">
-        <p class="text-center text-gray-400 mt-20 animate-pulse">Checking shelves...</p>
-    </div>
-
-    <div id="payment-modal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-end">
-        <div class="bg-white w-full rounded-t-3xl p-6 animate-slide-up shadow-2xl">
-            <h3 class="font-black text-xl mb-4 text-gray-800">Choose Payment Mode</h3>
-            <div class="space-y-3">
-                <div onclick="setPayment('UPI')" class="p-4 border-2 border-gray-100 rounded-2xl flex items-center justify-between hover:border-green-500 cursor-pointer">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-mobile-screen text-blue-500 text-xl"></i>
-                        <div>
-                            <p class="font-bold">UPI / PhonePe / GPay</p>
-                            <p class="text-xs text-green-600 font-bold">Extra ₹20 OFF Applied!</p>
-                        </div>
+    <div id="home-view" class="view-screen">
+        <header class="bg-white p-4 sticky top-0 z-50 shadow-sm">
+            <div class="flex justify-between items-center mb-4">
+                <div id="address-header" onclick="showAddressModal()" class="flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-location-dot text-green-600"></i>
+                    <div class="max-w-[150px]">
+                        <p class="text-[10px] font-black uppercase text-gray-400">Deliver to</p>
+                        <p id="current-addr" class="text-xs font-bold truncate">Select Address...</p>
                     </div>
-                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                    <i class="fa-solid fa-chevron-down text-[10px]"></i>
                 </div>
-                <div onclick="setPayment('COD')" class="p-4 border-2 border-gray-100 rounded-2xl flex items-center justify-between hover:border-green-500 cursor-pointer">
-                    <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-hand-holding-dollar text-orange-500 text-xl"></i>
-                        <p class="font-bold">Cash on Delivery (COD)</p>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
-                </div>
+                <div onclick="openAdmin()" class="h-10 w-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 border"><i class="fa-solid fa-user"></i></div>
             </div>
-            
-            <div id="upi-qr-box" class="hidden mt-4 p-4 bg-gray-50 rounded-2xl text-center">
-                <p class="text-xs font-bold text-gray-500 mb-2">SCAN & PAY TO CONFIRM</p>
-                <div id="qrcode" class="flex justify-center bg-white p-2 rounded-lg mb-2"></div>
-                <p class="text-[10px] text-red-500">*Please take a screenshot of success</p>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+                <input type="text" onkeyup="searchItems(this.value)" placeholder="Search for 'Atta', 'Milk'..." class="w-full bg-gray-100 p-3.5 pl-12 rounded-2xl text-sm font-bold border-none outline-none focus:ring-2 focus:ring-green-500">
             </div>
+        </header>
 
-            <button onclick="finalOrder()" id="final-btn" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black mt-6 shadow-lg">PLACE ORDER NOW</button>
-            <button onclick="closePayment()" class="w-full p-3 text-gray-400 font-bold mt-2">Go Back</button>
+        <div id="products-list" class="p-4 space-y-8 pb-32">
+            </div>
+    </div>
+
+    <div id="cat-view" class="view-screen view-hidden p-4">
+        <h2 class="text-2xl font-black mb-6">Shop by Category</h2>
+        <div class="grid grid-cols-2 gap-4" id="cat-grid"></div>
+    </div>
+
+    <div id="order-view" class="view-screen view-hidden p-4">
+        <h2 class="text-2xl font-black mb-4 text-center mt-20">Your Orders</h2>
+        <div class="flex flex-col items-center text-gray-400">
+            <i class="fa-solid fa-box-open text-6xl mb-4"></i>
+            <p>No active orders yet.</p>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-50 shadow-2xl">
-        <div class="flex flex-col items-center active-nav px-4">
-            <i class="fa-solid fa-house text-lg"></i>
-            <span class="text-[9px] mt-1 font-bold">Home</span>
+    <div id="checkout-page" class="view-hidden fixed inset-0 bg-white z-[150] overflow-y-auto">
+        <div class="p-4 border-b flex items-center gap-4 sticky top-0 bg-white">
+            <i onclick="closeCheckout()" class="fa-solid fa-arrow-left text-xl"></i>
+            <h2 class="font-black text-xl">Review Items</h2>
         </div>
-        <div onclick="window.scrollTo(0, 400)" class="flex flex-col items-center text-gray-400 px-4">
-            <i class="fa-solid fa-layer-group text-lg"></i>
-            <span class="text-[9px] mt-1 font-bold">Categories</span>
+        <div class="p-4 space-y-4" id="cart-items-list"></div>
+        
+        <div class="p-4 bg-gray-100 mx-4 rounded-2xl mb-4">
+            <h3 class="font-bold text-sm mb-2">Delivery Address</h3>
+            <p id="final-addr" class="text-xs text-gray-600">No address selected</p>
+            <button onclick="showAddressModal()" class="text-green-600 font-bold text-xs mt-2 underline">Change Address</button>
         </div>
-        <div onclick="alert('No orders yet!')" class="flex flex-col items-center text-gray-400 px-4">
-            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
-            <span class="text-[9px] mt-1 font-bold">Orders</span>
+
+        <div class="p-4 bg-white border-t space-y-3">
+            <h3 class="font-black">Payment Method</h3>
+            <div class="grid grid-cols-1 gap-2">
+                <div onclick="selectPay('UPI')" id="pay-upi" class="p-4 border-2 rounded-2xl flex justify-between items-center cursor-pointer border-green-500 bg-green-50">
+                    <span class="font-bold">UPI (GPay, PhonePe)</span>
+                    <span class="text-green-600 font-bold">₹20 OFF</span>
+                </div>
+                <div onclick="selectPay('COD')" id="pay-cod" class="p-4 border-2 rounded-2xl flex justify-between cursor-pointer border-gray-100">
+                    <span class="font-bold">Cash on Delivery</span>
+                </div>
+            </div>
+            <button onclick="confirmOrder()" class="w-full bg-green-700 text-white p-4 rounded-2xl font-black text-lg mt-4 shadow-xl">PLACE ORDER</button>
+        </div>
+    </div>
+
+    <nav class="fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-[100] shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+        <div onclick="switchView('home')" id="nav-home" class="flex flex-col items-center nav-active">
+            <i class="fa-solid fa-house text-xl"></i>
+            <span class="text-[10px] mt-1 font-bold">Home</span>
+        </div>
+        <div onclick="switchView('cat')" id="nav-cat" class="flex flex-col items-center text-gray-400">
+            <i class="fa-solid fa-grip text-xl"></i>
+            <span class="text-[10px] mt-1 font-bold">Category</span>
+        </div>
+        <div onclick="switchView('order')" id="nav-order" class="flex flex-col items-center text-gray-400">
+            <i class="fa-solid fa-bag-shopping text-xl"></i>
+            <span class="text-[10px] mt-1 font-bold">Orders</span>
         </div>
     </nav>
 
-    <div id="cart-bar" class="fixed bottom-20 left-4 right-4 bg-green-700 text-white p-4 rounded-2xl flex justify-between items-center shadow-2xl hidden z-40 transform transition-all scale-100">
+    <div id="cart-bar" class="fixed bottom-20 left-4 right-4 bg-green-700 text-white p-4 rounded-2xl flex justify-between items-center shadow-2xl hidden z-50 animate-bounce">
         <div class="flex items-center gap-3">
-            <div class="bg-white/20 p-2 rounded-lg"><i class="fa-solid fa-bag-shopping"></i></div>
-            <div>
-                <p id="cart-count" class="text-[10px] font-bold uppercase">0 ITEMS</p>
-                <p id="cart-total" class="font-black text-lg leading-none">₹0</p>
-            </div>
+            <span id="cart-qty" class="bg-white/20 px-2 py-1 rounded text-xs font-bold">1 Item</span>
+            <p id="cart-amt" class="font-black text-lg">₹0</p>
         </div>
-        <button onclick="openPayment()" class="bg-white text-green-700 px-6 py-2 rounded-xl font-black text-sm uppercase tracking-wider">Checkout</button>
+        <button onclick="openCheckout()" class="bg-white text-green-700 px-6 py-2 rounded-xl font-black text-sm">View Cart <i class="fa-solid fa-chevron-right ml-1"></i></button>
+    </div>
+
+    <div id="addr-modal" class="hidden fixed inset-0 bg-black/50 z-[250] flex items-end">
+        <div class="bg-white w-full rounded-t-3xl p-6">
+            <h3 class="font-black text-xl mb-4">Enter Address</h3>
+            <input id="inp-bldg" type="text" placeholder="Building/Flat Name" class="w-full p-3 bg-gray-100 rounded-xl mb-2">
+            <input id="inp-area" type="text" placeholder="Area/Street" class="w-full p-3 bg-gray-100 rounded-xl mb-2">
+            <input id="inp-land" type="text" placeholder="Landmark" class="w-full p-3 bg-gray-100 rounded-xl mb-4">
+            <button onclick="saveAddress()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black">SAVE & PROCEED</button>
+        </div>
     </div>
 
     <script>
         const db = "https://kirana-pro-default-rtdb.firebaseio.com/.json";
-        let cart = {}; let selectedPayment = ""; let distanceCharge = 0;
+        let cart = {}; let payMode = "UPI"; let savedAddr = localStorage.getItem('userAddr') || "";
 
-        function openAdmin() { if(prompt("Admin Pass?") === "Harshit@123") document.getElementById('admin-box').classList.remove('hidden'); }
-        function closeAdmin() { document.getElementById('admin-box').classList.add('hidden'); }
+        // SPLASH SCREEN TIMER
+        setTimeout(() => document.getElementById('splash').remove(), 3000);
 
-        async function loadItems() {
-            const res = await fetch(db);
-            const data = await res.json() || {};
-            const container = document.getElementById('category-container');
-            container.innerHTML = "";
+        // NAVIGATION LOGIC
+        function switchView(v) {
+            document.querySelectorAll('.view-screen').forEach(s => s.classList.add('view-hidden'));
+            document.getElementById(`${v}-view`).classList.remove('view-hidden');
+            document.querySelectorAll('nav div').forEach(d => d.classList.remove('nav-active'));
+            document.getElementById(`nav-${v}`).classList.add('nav-active');
+        }
 
-            const cats = ["Grocery & Kitchen", "Snacks & Drinks", "Beauty & Personal Care", "Household Essentials"];
-            cats.forEach(cat => {
-                let items = Object.keys(data).filter(id => data[id].category === cat);
+        // ADDRESS LOGIC
+        if(savedAddr) document.getElementById('current-addr').innerText = savedAddr;
+        function showAddressModal() { document.getElementById('addr-modal').classList.remove('hidden'); }
+        function saveAddress() {
+            let full = `${document.getElementById('inp-bldg').value}, ${document.getElementById('inp-area').value} (${document.getElementById('inp-land').value})`;
+            localStorage.setItem('userAddr', full);
+            document.getElementById('current-addr').innerText = full;
+            document.getElementById('addr-modal').classList.add('hidden');
+        }
+
+        // LOAD PRODUCTS
+        async function loadData() {
+            const r = await fetch(db); const data = await r.json() || {};
+            const list = document.getElementById('products-list');
+            const cats = ["Grocery & Kitchen", "Snacks & Drinks", "Beauty & Personal Care"];
+            
+            cats.forEach(c => {
+                let items = Object.keys(data).filter(id => data[id].category === c);
                 if(items.length > 0) {
-                    let html = `<div class="p-4 px-5"><h2 class="font-black text-xl text-gray-800 mb-4">${cat}</h2><div class="grid grid-cols-2 gap-4">`;
+                    let html = `<div class="cat-sec"><h2 class="font-black text-xl mb-4">${c}</h2><div class="grid grid-cols-2 gap-4">`;
                     items.forEach(id => {
                         let img = data[id].image || "https://cdn-icons-png.flaticon.com/512/679/679821.png";
                         html += `
-                        <div class="bg-white p-3 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center product-card" data-name="${data[id].name.toLowerCase()}">
-                            <div class="w-full h-24 bg-gray-50 rounded-2xl flex items-center justify-center mb-3">
-                                <img src="${img}" class="h-20 object-contain drop-shadow-md">
-                            </div>
-                            <h3 class="font-bold text-gray-800 text-[12px] h-8 text-center leading-tight mb-2">${data[id].name}</h3>
-                            <div class="flex justify-between items-center w-full mt-auto">
-                                <p class="text-green-700 font-black text-sm">₹${data[id].price}</p>
-                                <div class="flex items-center bg-green-50 rounded-xl p-1 border border-green-100">
-                                    <button onclick="changeQty('${data[id].name}', ${data[id].price}, -1)" class="w-7 h-7 bg-white text-green-700 rounded-lg shadow-sm font-black">-</button>
-                                    <span id="qty-${data[id].name.replace(/\s/g, '')}" class="font-black text-xs px-2 text-green-800">0</span>
-                                    <button onclick="changeQty('${data[id].name}', ${data[id].price}, 1)" class="w-7 h-7 bg-green-600 text-white rounded-lg shadow-sm font-black">+</button>
+                        <div class="bg-white p-3 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center">
+                            <img src="${img}" class="h-24 object-contain mb-2">
+                            <h3 class="text-[11px] font-bold h-8 text-center">${data[id].name}</h3>
+                            <div class="flex justify-between items-center w-full mt-2">
+                                <span class="font-black text-green-700">₹${data[id].price}</span>
+                                <div class="flex items-center gap-2 bg-green-50 rounded-xl p-1">
+                                    <button onclick="add('${data[id].name}', ${data[id].price}, -1)" class="w-6 h-6 bg-white rounded border">-</button>
+                                    <span id="q-${data[id].name.replace(/\s/g,'')}" class="text-xs font-bold">0</span>
+                                    <button onclick="add('${data[id].name}', ${data[id].price}, 1)" class="w-6 h-6 bg-green-600 text-white rounded">+</button>
                                 </div>
                             </div>
                         </div>`;
                     });
-                    html += `</div></div>`;
-                    container.innerHTML += html;
+                    list.innerHTML += html + `</div></div>`;
                 }
             });
         }
 
-        function changeQty(n, p, d) {
-            if(!cart[n]) cart[n] = { price: p, qty: 0 };
-            cart[n].qty += d;
-            if(cart[n].qty <= 0) delete cart[name];
-            document.getElementById(`qty-${n.replace(/\s/g, '')}`).innerText = cart[n] ? cart[n].qty : 0;
+        function add(n, p, d) {
+            if(!cart[n]) cart[n] = {p, q:0};
+            cart[n].q += d; if(cart[n].q <= 0) delete cart[n];
+            document.getElementById(`q-${n.replace(/\s/g,'')}`).innerText = cart[n] ? cart[n].q : 0;
             updateCart();
         }
 
         function updateCart() {
-            let total = 0, count = 0;
-            for(let k in cart) { total += cart[k].price * cart[k].qty; count += cart[k].qty; }
-            const bar = document.getElementById('cart-bar');
-            if(count > 0) {
-                bar.classList.remove('hidden');
-                document.getElementById('cart-count').innerText = `${count} ITEMS`;
-                document.getElementById('cart-total').innerText = `₹${total}`;
-            } else { bar.classList.add('hidden'); }
+            let t = 0, c = 0; for(let k in cart) { t += cart[k].p * cart[k].q; c += cart[k].q; }
+            document.getElementById('cart-bar').classList.toggle('hidden', c === 0);
+            document.getElementById('cart-qty').innerText = `${c} Items`;
+            document.getElementById('cart-amt').innerText = `₹${t}`;
         }
 
-        function searchItems() {
-            let term = document.getElementById('searchBar').value.toLowerCase();
-            document.querySelectorAll('.product-card').forEach(c => {
-                c.style.display = c.getAttribute('data-name').includes(term) ? "block" : "none";
-            });
-        }
-
-        function openPayment() {
-            let total = 0; for(let k in cart) total += cart[k].price * cart[k].qty;
-            if(total < 100) return alert("Bhai, kam se kam ₹100 ka saaman lo!");
-            document.getElementById('payment-modal').classList.remove('hidden');
-        }
-
-        function closePayment() { document.getElementById('payment-modal').classList.add('hidden'); }
-
-        function setPayment(mode) {
-            selectedPayment = mode;
-            const qrBox = document.getElementById('upi-qr-box');
-            if(mode === 'UPI') {
-                qrBox.classList.remove('hidden');
-                let total = 0; for(let k in cart) total += cart[k].price * cart[k].qty;
-                let finalTotal = total - 20; // ₹20 OFF
-                document.getElementById('qrcode').innerHTML = "";
-                new QRCode(document.getElementById("qrcode"), {
-                    text: `upi://pay?pa=harshitb357-1@okhdfcbank&pn=AnnapurnaMart&am=${finalTotal}&cu=INR`,
-                    width: 140, height: 140
-                });
-                alert("UPI chuna hai! ₹20 automatic kam ho gaye.");
-            } else {
-                qrBox.classList.add('hidden');
-                alert("COD chuna hai! Discount nahi milega.");
-            }
-        }
-
-        function finalOrder() {
-            if(!selectedPayment) return alert("Pehle Payment Mode toh chuno!");
-            let addr = prompt("Pura Address + Landmark likhein:");
-            if(!addr) return;
-
-            let msg = `*🛒 NEW ORDER - ANNAPURNA MART*\n\n`;
-            let total = 0;
+        // CHECKOUT & PAYMENT
+        function openCheckout() {
+            document.getElementById('checkout-page').classList.remove('view-hidden');
+            let list = document.getElementById('cart-items-list'); list.innerHTML = "";
             for(let k in cart) {
-                msg += `✅ ${k} x ${cart[k].qty} = ₹${cart[k].price * cart[k].qty}\n`;
-                total += cart[k].price * cart[k].qty;
+                list.innerHTML += `<div class="flex justify-between font-bold text-sm"><span>${k} x ${cart[k].q}</span><span>₹${cart[k].p * cart[k].q}</span></div>`;
             }
-            let disc = (selectedPayment === 'UPI') ? 20 : 0;
-            msg += `\n*Sub-total:* ₹${total}`;
-            msg += `\n*Payment Mode:* ${selectedPayment}`;
-            msg += `\n*Discount:* -₹${disc}`;
-            msg += `\n*TOTAL BILL: ₹${total - disc}*`;
-            msg += `\n\n📍 *Address:* ${addr}`;
-
-            window.open(`https://wa.me/919799856807?text=${encodeURIComponent(msg)}`);
+            document.getElementById('final-addr').innerText = localStorage.getItem('userAddr') || "Please add address";
         }
 
-        async function addItem() {
-            const name = document.getElementById('p-name').value;
-            const price = document.getElementById('p-price').value;
-            const category = document.getElementById('p-cat').value;
-            const file = document.getElementById('p-photo').files[0];
-            if(!name || !price) return alert("Details bharo!");
+        function closeCheckout() { document.getElementById('checkout-page').classList.add('view-hidden'); }
 
-            if(file) {
-                const r = new FileReader();
-                r.onloadend = async () => {
-                    await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, category, image: r.result }) });
-                    location.reload();
-                };
-                r.readAsDataURL(file);
-            } else {
-                await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, category }) });
-                location.reload();
-            }
+        function selectPay(m) {
+            payMode = m;
+            document.getElementById('pay-upi').classList.toggle('border-green-500', m==='UPI');
+            document.getElementById('pay-cod').classList.toggle('border-green-500', m==='COD');
         }
 
-        loadItems();
+        function confirmOrder() {
+            let addr = localStorage.getItem('userAddr'); if(!addr) return showAddressModal();
+            let total = 0; for(let k in cart) total += cart[k].p * cart[k].q;
+            let final = (payMode === 'UPI') ? total - 20 : total;
+
+            if(payMode === 'UPI') {
+                // REDIRECT TO PHONEPE/GPAY DIRECTLY
+                let upiUrl = `upi://pay?pa=harshitb357-1@okhdfcbank&pn=AnnapurnaMart&am=${final}&cu=INR`;
+                window.location.href = upiUrl;
+            }
+            
+            // SEND WHATSAPP DATA
+            let msg = `*NEW ORDER - ${payMode}*\n\nItems:\n`;
+            for(let k in cart) msg += `- ${k} (${cart[k].q})\n`;
+            msg += `\n*TOTAL: ₹${final}*\n📍 *Addr:* ${addr}`;
+            setTimeout(() => window.open(`https://wa.me/919799856807?text=${encodeURIComponent(msg)}`), 2000);
+        }
+
+        loadData();
     </script>
 </body>
 </html>
