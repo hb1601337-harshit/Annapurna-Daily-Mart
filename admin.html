@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Annapurna Admin | Blinkit Style</title>
+    <title>Annapurna Admin | Bulk Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -11,11 +11,7 @@
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 z-[1000] flex items-center justify-center p-6">
         <div class="bg-white p-8 rounded-[40px] w-full max-w-sm text-center shadow-2xl">
-            <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i class="fa-solid fa-lock text-green-600 text-3xl"></i>
-            </div>
-            <h1 class="text-2xl font-black mb-2 text-slate-800">Admin Access</h1>
-            <p class="text-gray-400 text-sm mb-6 font-bold">Annapurna Daily Mart Portal</p>
+            <h1 class="text-2xl font-black mb-6 text-slate-800 italic">Annapurna Admin</h1>
             <input id="admin-pass" type="password" placeholder="Enter Secret Code" class="w-full p-4 bg-gray-100 rounded-2xl mb-4 text-center font-black outline-none border-2 border-transparent focus:border-green-500">
             <button onclick="checkPass()" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black shadow-lg">UNLOCK DASHBOARD</button>
         </div>
@@ -24,22 +20,24 @@
     <div id="dashboard" class="hidden">
         <header class="bg-white p-6 shadow-sm sticky top-0 z-50 flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-black text-slate-800 italic">Annapurna Admin</h1>
-                <p class="text-[10px] font-black text-green-600 uppercase tracking-widest">Store Manager Mode</p>
+                <h1 class="text-xl font-black text-slate-800">Admin Panel</h1>
+                <p class="text-[10px] font-black text-green-600 uppercase italic">Control Room</p>
             </div>
             <button onclick="location.reload()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold text-xs">LOGOUT</button>
         </header>
 
-        <div class="p-6 grid grid-cols-2 gap-4">
-            <div class="bg-green-600 p-5 rounded-[30px] text-white shadow-lg">
-                <p class="text-[10px] font-bold opacity-80 uppercase">Total Items</p>
-                <h2 id="stat-total" class="text-3xl font-black">0</h2>
+        <div class="p-6">
+            <div class="bg-blue-600 p-6 rounded-[35px] text-white shadow-xl flex flex-col items-center">
+                <i class="fa-solid fa-bolt text-3xl mb-2"></i>
+                <h3 class="font-black text-lg">Blinkit Magic Upload</h3>
+                <p class="text-xs opacity-80 mb-4 text-center">Ek click mein 50+ items photos ke saath chadhayein</p>
+                <button id="bulk-btn" onclick="importBlinkitData()" class="w-full bg-white text-blue-600 p-4 rounded-2xl font-black shadow-lg active:scale-95 transition">START BULK IMPORT</button>
             </div>
         </div>
 
         <div class="px-6 mb-8">
             <div class="bg-white p-6 rounded-[35px] shadow-sm border">
-                <h3 class="font-black text-lg mb-4 italic">Add New Product</h3>
+                <h3 class="font-black text-lg mb-4 italic">Add Single Item</h3>
                 <div class="space-y-4">
                     <input id="p-name" type="text" placeholder="Item Name" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border outline-none">
                     <div class="grid grid-cols-2 gap-4">
@@ -52,7 +50,7 @@
                         </select>
                     </div>
                     <label class="block bg-slate-100 p-4 rounded-2xl border-2 border-dashed text-center">
-                        <span class="text-xs font-black text-gray-500">UPLOAD PHOTO</span>
+                        <span class="text-xs font-black text-gray-500">PHOTO UPLOAD</span>
                         <input id="p-img" type="file" accept="image/*" class="hidden">
                     </label>
                     <button id="add-btn" onclick="uploadItem()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black shadow-xl">PUBLISH ITEM</button>
@@ -61,7 +59,10 @@
         </div>
 
         <div class="px-6">
-            <h3 class="font-black text-lg mb-4 italic text-slate-800">Inventory</h3>
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-black text-lg italic text-slate-800">Inventory Management</h3>
+                <span id="stat-total" class="bg-gray-200 px-3 py-1 rounded-full text-xs font-black text-gray-600">0 ITEMS</span>
+            </div>
             <div id="inventory-list" class="space-y-3"></div>
         </div>
     </div>
@@ -77,6 +78,34 @@
             } else { alert("Wrong Password!"); }
         }
 
+        // --- MAGIC BULK DATA ---
+        async function importBlinkitData() {
+            const items = [
+                { name: "Aashirvaad Atta 5kg", price: 295, category: "Grocery & Kitchen", image: "https://www.bigbasket.com/media/uploads/p/l/126906_8-aashirvaad-atta-whole-wheat.jpg" },
+                { name: "Amul Gold Milk 1L", price: 66, category: "Dairy & Breakfast", image: "https://m.media-amazon.com/images/I/71ByX27W9IL._SL1500_.jpg" },
+                { name: "Maggi 4-Pack", price: 60, category: "Snacks & Drinks", image: "https://m.media-amazon.com/images/I/8109m-S6pOL._SL1500_.jpg" },
+                { name: "Tata Salt 1kg", price: 28, category: "Grocery & Kitchen", image: "https://m.media-amazon.com/images/I/61N9p7X6SJL._SL1500_.jpg" },
+                { name: "Fortune Oil 1L", price: 145, category: "Grocery & Kitchen", image: "https://m.media-amazon.com/images/I/61y8S3K+f4L._SL1200_.jpg" },
+                { name: "Lay's Classic", price: 20, category: "Snacks & Drinks", image: "https://m.media-amazon.com/images/I/81vNn6p-O1L._SL1500_.jpg" },
+                { name: "Surf Excel 1kg", price: 215, category: "Household", image: "https://m.media-amazon.com/images/I/619SndT0WFL._SL1000_.jpg" },
+                { name: "Colgate Paste", price: 55, category: "Personal Care", image: "https://m.media-amazon.com/images/I/61M40m1A7TL._SL1500_.jpg" },
+                { name: "Dettol Soap", price: 35, category: "Personal Care", image: "https://m.media-amazon.com/images/I/61EExm2j8+L._SL1000_.jpg" },
+                { name: "Britannia Parle-G", price: 10, category: "Snacks & Drinks", image: "https://m.media-amazon.com/images/I/71Vf-M93-mL._SL1500_.jpg" }
+            ];
+
+            if(confirm("Bhai, kya aap 10 main items ek saath chadhana chahte ho?")) {
+                const btn = document.getElementById('bulk-btn');
+                btn.innerText = "Processing Magic...";
+                btn.disabled = true;
+
+                for(let itm of items) {
+                    await fetch(db, { method: 'POST', body: JSON.stringify(itm) });
+                }
+                alert("Done! Dukaan bhar gayi. Ab rates check kar lo.");
+                location.reload();
+            }
+        }
+
         async function loadInventory() {
             const res = await fetch(db);
             const data = await res.json() || {};
@@ -89,12 +118,17 @@
                 <div class="bg-white p-4 rounded-3xl shadow-sm border flex justify-between items-center">
                     <div class="flex items-center gap-4">
                         <img src="${data[id].image || ''}" class="w-12 h-12 rounded-xl object-contain border">
-                        <div><p class="font-black text-sm">${data[id].name}</p><p class="text-[10px] font-bold text-gray-400 uppercase">₹${data[id].price}</p></div>
+                        <div>
+                            <p class="font-black text-sm">${data[id].name}</p>
+                            <p class="text-[10px] font-bold text-gray-400">₹${data[id].price}</p>
+                        </div>
                     </div>
-                    <button onclick="deleteItem('${id}')" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
+                    <div class="flex gap-2">
+                        <button onclick="deleteItem('${id}')" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
+                    </div>
                 </div>`;
             }
-            document.getElementById('stat-total').innerText = count;
+            document.getElementById('stat-total').innerText = count + " ITEMS";
         }
 
         async function uploadItem() {
@@ -116,7 +150,7 @@
         }
 
         async function deleteItem(id) {
-            if(confirm("Hata de?")) {
+            if(confirm("Hata dein?")) {
                 await fetch(`https://kirana-pro-default-rtdb.firebaseio.com/${id}.json`, { method: 'DELETE' });
                 loadInventory();
             }
