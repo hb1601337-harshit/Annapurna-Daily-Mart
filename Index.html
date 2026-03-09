@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annapurna Daily Mart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body class="bg-gray-100 pb-24">
+
+    <div id="admin-box" class="hidden bg-slate-900 text-white p-5 fixed inset-0 z-[100] overflow-y-auto">
+        <h2 class="text-xl font-bold mb-4">Admin Control Center</h2>
+        <input id="p-name" type="text" placeholder="Item Name" class="w-full p-2 mb-2 text-black">
+        <input id="p-price" type="number" placeholder="Price" class="w-full p-2 mb-2 text-black">
+        <button onclick="addItem()" class="bg-green-500 w-full p-2 font-bold mb-4">Add Item</button>
+        <hr class="my-4">
+        <input id="announcement" type="text" placeholder="Customer Message (Notice)" class="w-full p-2 mb-2 text-black">
+        <button onclick="setNotice()" class="bg-blue-500 w-full p-2 font-bold">Update Notice</button>
+        <button onclick="closeAdmin()" class="mt-10 text-red-400">Close Admin</button>
+    </div>
+
+    <header class="bg-green-600 p-4 text-white shadow-lg flex justify-between">
+        <h1 onclick="openAdmin()" class="font-black italic">Annapurna Daily Mart</h1>
+        <div id="status-dot" class="h-3 w-3 bg-red-500 rounded-full animate-pulse"></div>
+    </header>
+    <div id="notice-bar" class="bg-yellow-100 p-2 text-xs text-center font-bold text-red-600">
+        Loading latest updates...
+    </div>
+
+    <div id="products" class="p-4 grid grid-cols-2 gap-4"></div>
+
+    <div id="tracker" class="m-4 p-4 bg-white rounded-xl shadow-inner border-2 border-dashed border-green-300">
+        <p class="text-[10px] font-bold text-gray-400 uppercase">Current Order Status</p>
+        <div class="flex justify-between mt-2">
+            <span id="step1" class="text-[10px] opacity-30 text-green-700">Packed</span>
+            <span id="step2" class="text-[10px] opacity-30 text-green-700">On Way</span>
+            <span id="step3" class="text-[10px] opacity-30 text-green-700">Delivered</span>
+        </div>
+    </div>
+
+    <div id="checkout" class="fixed bottom-0 w-full bg-white p-4 border-t hidden">
+        <div id="qrcode" class="flex justify-center mb-2"></div>
+        <div class="flex justify-between items-center">
+            <p id="total" class="text-xl font-bold">Total: ₹0</p>
+            <button onclick="sendOrderWA()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold">Place Order</button>
+        </div>
+    </div>
+
+    <script>
+        const db = "https://kirana-pro-default-rtdb.firebaseio.com/"; 
+        let cart = []; let totalAmt = 0;
+
+        function openAdmin() { if(prompt("Pass?") === "Harshit@123") document.getElementById('admin-box').classList.remove('hidden'); }
+        function closeAdmin() { document.getElementById('admin-box').classList.add('hidden'); }
+
+        // QR Code Generator (UPI)
+        function generateQR(amt) {
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), {
+                text: `upi://pay?pa=harshitb357-1@okhdfcbank&pn=Annapurna Daily Mart&am=${amt}&cu=INR`,
+                width: 128, height: 128
+            });
+        }
+
+        // Add to Cart
+        function addToCart(n, p) {
+            cart.push({n, p});
+            totalAmt += parseInt(p);
+            document.getElementById('checkout').classList.remove('hidden');
+            document.getElementById('total').innerText = "Total: ₹" + totalAmt;
+            generateQR(totalAmt);
+        }
+
+        function sendOrderWA() {
+            let msg = "Order Details:\n";
+            cart.forEach(i => msg += `- ${i.n}: ₹${i.p}\n`);
+            msg += `\nTotal: ₹${totalAmt}\nAddress: [SHARING LOCATION]`;
+            window.open(`https://wa.me/919799856807?text=${encodeURIComponent(msg)}`);
+        }
+    </script>
+</body>
+</html>
