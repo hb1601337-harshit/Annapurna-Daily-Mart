@@ -6,167 +6,243 @@
     <title>Annapurna Daily Mart</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .active-nav { color: #16a34a; border-top: 3px solid #16a34a; }
+    </style>
 </head>
-<body class="bg-gray-100 pb-32">
+<body class="bg-gray-50 pb-32">
 
-    <div id="admin-box" class="hidden bg-slate-900 text-white p-5 fixed inset-0 z-[100] overflow-y-auto">
-        <h2 class="text-xl font-bold mb-4 text-green-400">Admin Control Center</h2>
-        <input id="p-name" type="text" placeholder="Item Name (e.g. Aata 5kg)" class="w-full p-2 mb-2 text-black rounded">
-        <input id="p-price" type="number" placeholder="Price (₹)" class="w-full p-2 mb-2 text-black rounded">
-        
-        <label class="block mb-2 text-sm font-medium">Add Photo (Camera/Gallery):</label>
-        <input id="p-photo" type="file" accept="image/*" class="w-full p-2 mb-4 text-white bg-slate-800 rounded">
-        
-        <button onclick="addItem()" class="bg-green-500 w-full p-3 font-bold mb-4 rounded shadow-lg">Upload Item</button>
-        <button onclick="closeAdmin()" class="w-full text-center text-red-400 font-bold border border-red-400 p-2 rounded">Close Admin</button>
+    <div id="admin-box" class="hidden bg-slate-900 text-white p-6 fixed inset-0 z-[100] overflow-y-auto">
+        <h2 class="text-2xl font-bold mb-4 text-green-400">Add New Product</h2>
+        <input id="p-name" type="text" placeholder="Product Name" class="w-full p-3 mb-3 text-black rounded-xl">
+        <input id="p-price" type="number" placeholder="Price (₹)" class="w-full p-3 mb-3 text-black rounded-xl">
+        <select id="p-cat" class="w-full p-3 mb-3 text-black rounded-xl">
+            <option value="Grocery & Kitchen">Grocery & Kitchen</option>
+            <option value="Snacks & Drinks">Snacks & Drinks</option>
+            <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+            <option value="Household Essentials">Household Essentials</option>
+        </select>
+        <input id="p-photo" type="file" accept="image/*" class="w-full p-3 mb-4 bg-slate-800 rounded-xl">
+        <button onclick="addItem()" class="bg-green-500 w-full p-4 font-black rounded-xl text-black shadow-lg mb-3">UPLOAD PRODUCT</button>
+        <button onclick="closeAdmin()" class="w-full p-3 text-red-400 font-bold border border-red-400 rounded-xl">CANCEL</button>
     </div>
 
-    <header class="bg-green-600 p-4 text-white shadow-lg flex justify-between items-center sticky top-0 z-50">
-        <h1 onclick="openAdmin()" class="font-black italic text-lg tracking-wider">ANNAPURNA DAILY MART 🛒</h1>
-        <div class="h-3 w-3 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_#4ade80]"></div>
+    <header class="bg-white p-4 sticky top-0 z-50 shadow-sm">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 onclick="openAdmin()" class="font-black text-2xl text-green-600 italic">Annapurna Mart</h1>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest"><i class="fa-solid fa-location-crosshairs text-green-500"></i> Beawar, RJ</p>
+            </div>
+            <div onclick="alert('Profile section coming soon!')" class="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 border border-green-200 shadow-inner">
+                <i class="fa-solid fa-user"></i>
+            </div>
+        </div>
+        <div class="relative group">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-400"></i>
+            <input type="text" id="searchBar" onkeyup="searchItems()" placeholder="Search 'atta', 'oil' or 'chips'..." class="w-full bg-gray-100 p-3.5 pl-12 rounded-2xl text-sm outline-none border border-transparent focus:border-green-500 focus:bg-white transition-all">
+        </div>
     </header>
 
-    <div id="notice-bar" class="bg-yellow-100 p-2 text-[11px] text-center font-bold text-red-600 border-b">
-        Min. Order: ₹100 | Beawar Local Delivery Available
+    <div id="category-container" class="space-y-6 mt-2 pb-10">
+        <p class="text-center text-gray-400 mt-20 animate-pulse">Checking shelves...</p>
     </div>
 
-    <div id="products" class="p-4 grid grid-cols-2 gap-4">
-        <p class="col-span-2 text-center text-gray-400 py-10">Loading items...</p>
-    </div>
+    <div id="payment-modal" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-end">
+        <div class="bg-white w-full rounded-t-3xl p-6 animate-slide-up shadow-2xl">
+            <h3 class="font-black text-xl mb-4 text-gray-800">Choose Payment Mode</h3>
+            <div class="space-y-3">
+                <div onclick="setPayment('UPI')" class="p-4 border-2 border-gray-100 rounded-2xl flex items-center justify-between hover:border-green-500 cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-mobile-screen text-blue-500 text-xl"></i>
+                        <div>
+                            <p class="font-bold">UPI / PhonePe / GPay</p>
+                            <p class="text-xs text-green-600 font-bold">Extra ₹20 OFF Applied!</p>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                </div>
+                <div onclick="setPayment('COD')" class="p-4 border-2 border-gray-100 rounded-2xl flex items-center justify-between hover:border-green-500 cursor-pointer">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-hand-holding-dollar text-orange-500 text-xl"></i>
+                        <p class="font-bold">Cash on Delivery (COD)</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-gray-300"></i>
+                </div>
+            </div>
+            
+            <div id="upi-qr-box" class="hidden mt-4 p-4 bg-gray-50 rounded-2xl text-center">
+                <p class="text-xs font-bold text-gray-500 mb-2">SCAN & PAY TO CONFIRM</p>
+                <div id="qrcode" class="flex justify-center bg-white p-2 rounded-lg mb-2"></div>
+                <p class="text-[10px] text-red-500">*Please take a screenshot of success</p>
+            </div>
 
-    <div id="checkout" class="fixed bottom-0 w-full bg-white p-4 border-t shadow-lg hidden">
-        <div id="qrcode" class="flex justify-center mb-4 p-2 bg-white rounded shadow-sm"></div>
-        <div class="space-y-2">
-            <div class="flex justify-between font-bold text-gray-600">
-                <span>Sub-total:</span> <span id="sub-total">₹0</span>
-            </div>
-            <div class="flex justify-between font-bold text-blue-600">
-                <span>Delivery Charge:</span> <span id="del-charge">₹0</span>
-            </div>
-            <div class="flex justify-between text-xl font-black text-green-700 border-t pt-2">
-                <span>Total Bill:</span> <span id="final-total">₹0</span>
-            </div>
-            
-            <p id="min-order-msg" class="text-red-500 text-xs font-bold text-center"></p>
-            
-            <button id="wa-btn" onclick="sendOrderWA()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold shadow-lg opacity-50 cursor-not-allowed" disabled>
-                Place Order on WhatsApp
-            </button>
+            <button onclick="finalOrder()" id="final-btn" class="w-full bg-green-600 text-white p-4 rounded-2xl font-black mt-6 shadow-lg">PLACE ORDER NOW</button>
+            <button onclick="closePayment()" class="w-full p-3 text-gray-400 font-bold mt-2">Go Back</button>
         </div>
     </div>
 
-    <script>
-        const db = "https://kirana-pro-default-rtdb.firebaseio.com/.json"; 
-        let cart = []; 
-        let subTotal = 0;
-        let deliveryCharge = 0;
+    <nav class="fixed bottom-0 w-full bg-white border-t flex justify-around py-3 z-50 shadow-2xl">
+        <div class="flex flex-col items-center active-nav px-4">
+            <i class="fa-solid fa-house text-lg"></i>
+            <span class="text-[9px] mt-1 font-bold">Home</span>
+        </div>
+        <div onclick="window.scrollTo(0, 400)" class="flex flex-col items-center text-gray-400 px-4">
+            <i class="fa-solid fa-layer-group text-lg"></i>
+            <span class="text-[9px] mt-1 font-bold">Categories</span>
+        </div>
+        <div onclick="alert('No orders yet!')" class="flex flex-col items-center text-gray-400 px-4">
+            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+            <span class="text-[9px] mt-1 font-bold">Orders</span>
+        </div>
+    </nav>
 
-        function openAdmin() { if(prompt("Password?") === "Harshit@123") document.getElementById('admin-box').classList.remove('hidden'); }
+    <div id="cart-bar" class="fixed bottom-20 left-4 right-4 bg-green-700 text-white p-4 rounded-2xl flex justify-between items-center shadow-2xl hidden z-40 transform transition-all scale-100">
+        <div class="flex items-center gap-3">
+            <div class="bg-white/20 p-2 rounded-lg"><i class="fa-solid fa-bag-shopping"></i></div>
+            <div>
+                <p id="cart-count" class="text-[10px] font-bold uppercase">0 ITEMS</p>
+                <p id="cart-total" class="font-black text-lg leading-none">₹0</p>
+            </div>
+        </div>
+        <button onclick="openPayment()" class="bg-white text-green-700 px-6 py-2 rounded-xl font-black text-sm uppercase tracking-wider">Checkout</button>
+    </div>
+
+    <script>
+        const db = "https://kirana-pro-default-rtdb.firebaseio.com/.json";
+        let cart = {}; let selectedPayment = ""; let distanceCharge = 0;
+
+        function openAdmin() { if(prompt("Admin Pass?") === "Harshit@123") document.getElementById('admin-box').classList.remove('hidden'); }
         function closeAdmin() { document.getElementById('admin-box').classList.add('hidden'); }
 
-        // Load Items
         async function loadItems() {
             const res = await fetch(db);
-            const data = await res.json();
-            const container = document.getElementById('products');
+            const data = await res.json() || {};
+            const container = document.getElementById('category-container');
             container.innerHTML = "";
-            for(let id in data) {
-                let photo = data[id].image ? data[id].image : "https://cdn-icons-png.flaticon.com/512/679/679821.png";
-                container.innerHTML += `
-                    <div class="bg-white p-3 shadow-sm border rounded-xl flex flex-col items-center">
-                        <img src="${photo}" class="w-full h-24 object-contain mb-2">
-                        <h3 class="font-bold text-gray-800 text-sm">${data[id].name}</h3>
-                        <p class="text-green-600 font-bold mb-2 text-sm">₹${data[id].price}</p>
-                        <button onclick="addToCart('${data[id].name}', ${data[id].price})" class="bg-green-100 text-green-700 text-xs font-bold w-full py-2 rounded-lg">ADD +</button>
-                    </div>
-                `;
-            }
-        }
 
-        // Add Item with Photo (Base64)
-        async function addItem() {
-            const name = document.getElementById('p-name').value;
-            const price = document.getElementById('p-price').value;
-            const photoFile = document.getElementById('p-photo').files[0];
-
-            if(!name || !price) return alert("Bhai naam aur price daalo!");
-
-            let base64Image = "";
-            if(photoFile) {
-                const reader = new FileReader();
-                reader.onloadend = async function() {
-                    base64Image = reader.result;
-                    await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, image: base64Image }) });
-                    alert("Done!"); location.reload();
-                };
-                reader.readAsDataURL(photoFile);
-            } else {
-                await fetch(db, { method: 'POST', body: JSON.stringify({ name, price }) });
-                alert("Done (without photo)!"); location.reload();
-            }
-        }
-
-        function addToCart(n, p) {
-            cart.push({n, p});
-            subTotal += parseInt(p);
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            document.getElementById('checkout').classList.remove('hidden');
-            
-            // Delivery Logic: Pachbatti Circle 4km rule
-            let distance = prompt("Pachbatti Circle se aapki doori (KM mein) likhein:", "0");
-            distance = parseInt(distance) || 0;
-            
-            if(distance > 4) {
-                deliveryCharge = distance * 5;
-            } else {
-                deliveryCharge = 0;
-            }
-
-            let finalTotal = subTotal + deliveryCharge;
-
-            document.getElementById('sub-total').innerText = "₹" + subTotal;
-            document.getElementById('del-charge').innerText = "₹" + deliveryCharge;
-            document.getElementById('final-total').innerText = "₹" + finalTotal;
-
-            const waBtn = document.getElementById('wa-btn');
-            const msg = document.getElementById('min-order-msg');
-
-            if(subTotal >= 100) {
-                waBtn.disabled = false;
-                waBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                msg.innerText = "";
-            } else {
-                waBtn.disabled = true;
-                waBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                msg.innerText = "Minimum Order ₹100 zaroori hai (Abhi: ₹" + subTotal + ")";
-            }
-
-            generateQR(finalTotal);
-        }
-
-        function generateQR(amt) {
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), {
-                text: `upi://pay?pa=harshitb357-1@okhdfcbank&pn=AnnapurnaMart&am=${amt}&cu=INR`,
-                width: 120, height: 120
+            const cats = ["Grocery & Kitchen", "Snacks & Drinks", "Beauty & Personal Care", "Household Essentials"];
+            cats.forEach(cat => {
+                let items = Object.keys(data).filter(id => data[id].category === cat);
+                if(items.length > 0) {
+                    let html = `<div class="p-4 px-5"><h2 class="font-black text-xl text-gray-800 mb-4">${cat}</h2><div class="grid grid-cols-2 gap-4">`;
+                    items.forEach(id => {
+                        let img = data[id].image || "https://cdn-icons-png.flaticon.com/512/679/679821.png";
+                        html += `
+                        <div class="bg-white p-3 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center product-card" data-name="${data[id].name.toLowerCase()}">
+                            <div class="w-full h-24 bg-gray-50 rounded-2xl flex items-center justify-center mb-3">
+                                <img src="${img}" class="h-20 object-contain drop-shadow-md">
+                            </div>
+                            <h3 class="font-bold text-gray-800 text-[12px] h-8 text-center leading-tight mb-2">${data[id].name}</h3>
+                            <div class="flex justify-between items-center w-full mt-auto">
+                                <p class="text-green-700 font-black text-sm">₹${data[id].price}</p>
+                                <div class="flex items-center bg-green-50 rounded-xl p-1 border border-green-100">
+                                    <button onclick="changeQty('${data[id].name}', ${data[id].price}, -1)" class="w-7 h-7 bg-white text-green-700 rounded-lg shadow-sm font-black">-</button>
+                                    <span id="qty-${data[id].name.replace(/\s/g, '')}" class="font-black text-xs px-2 text-green-800">0</span>
+                                    <button onclick="changeQty('${data[id].name}', ${data[id].price}, 1)" class="w-7 h-7 bg-green-600 text-white rounded-lg shadow-sm font-black">+</button>
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                    html += `</div></div>`;
+                    container.innerHTML += html;
+                }
             });
         }
 
-        function sendOrderWA() {
-            let address = prompt("Apna Pura Address aur Landmark Likhein:");
-            if(!address) return alert("Address ke bina delivery kaise hogi bhai?");
+        function changeQty(n, p, d) {
+            if(!cart[n]) cart[n] = { price: p, qty: 0 };
+            cart[n].qty += d;
+            if(cart[n].qty <= 0) delete cart[name];
+            document.getElementById(`qty-${n.replace(/\s/g, '')}`).innerText = cart[n] ? cart[n].qty : 0;
+            updateCart();
+        }
 
-            let msg = "*🛒 NEW ORDER - ANNAPURNA DAILY MART*\n\n";
-            cart.forEach((i, idx) => msg += `${idx+1}. ${i.n} - ₹${i.p}\n`);
-            msg += `\n*Sub-total:* ₹${subTotal}`;
-            msg += `\n*Delivery Charge:* ₹${deliveryCharge}`;
-            msg += `\n*TOTAL BILL: ₹${subTotal + deliveryCharge}*`;
-            msg += `\n\n📍 *Address:* ${address}\n🚩 *Beawar (Verified)*`;
-            
+        function updateCart() {
+            let total = 0, count = 0;
+            for(let k in cart) { total += cart[k].price * cart[k].qty; count += cart[k].qty; }
+            const bar = document.getElementById('cart-bar');
+            if(count > 0) {
+                bar.classList.remove('hidden');
+                document.getElementById('cart-count').innerText = `${count} ITEMS`;
+                document.getElementById('cart-total').innerText = `₹${total}`;
+            } else { bar.classList.add('hidden'); }
+        }
+
+        function searchItems() {
+            let term = document.getElementById('searchBar').value.toLowerCase();
+            document.querySelectorAll('.product-card').forEach(c => {
+                c.style.display = c.getAttribute('data-name').includes(term) ? "block" : "none";
+            });
+        }
+
+        function openPayment() {
+            let total = 0; for(let k in cart) total += cart[k].price * cart[k].qty;
+            if(total < 100) return alert("Bhai, kam se kam ₹100 ka saaman lo!");
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function closePayment() { document.getElementById('payment-modal').classList.add('hidden'); }
+
+        function setPayment(mode) {
+            selectedPayment = mode;
+            const qrBox = document.getElementById('upi-qr-box');
+            if(mode === 'UPI') {
+                qrBox.classList.remove('hidden');
+                let total = 0; for(let k in cart) total += cart[k].price * cart[k].qty;
+                let finalTotal = total - 20; // ₹20 OFF
+                document.getElementById('qrcode').innerHTML = "";
+                new QRCode(document.getElementById("qrcode"), {
+                    text: `upi://pay?pa=harshitb357-1@okhdfcbank&pn=AnnapurnaMart&am=${finalTotal}&cu=INR`,
+                    width: 140, height: 140
+                });
+                alert("UPI chuna hai! ₹20 automatic kam ho gaye.");
+            } else {
+                qrBox.classList.add('hidden');
+                alert("COD chuna hai! Discount nahi milega.");
+            }
+        }
+
+        function finalOrder() {
+            if(!selectedPayment) return alert("Pehle Payment Mode toh chuno!");
+            let addr = prompt("Pura Address + Landmark likhein:");
+            if(!addr) return;
+
+            let msg = `*🛒 NEW ORDER - ANNAPURNA MART*\n\n`;
+            let total = 0;
+            for(let k in cart) {
+                msg += `✅ ${k} x ${cart[k].qty} = ₹${cart[k].price * cart[k].qty}\n`;
+                total += cart[k].price * cart[k].qty;
+            }
+            let disc = (selectedPayment === 'UPI') ? 20 : 0;
+            msg += `\n*Sub-total:* ₹${total}`;
+            msg += `\n*Payment Mode:* ${selectedPayment}`;
+            msg += `\n*Discount:* -₹${disc}`;
+            msg += `\n*TOTAL BILL: ₹${total - disc}*`;
+            msg += `\n\n📍 *Address:* ${addr}`;
+
             window.open(`https://wa.me/919799856807?text=${encodeURIComponent(msg)}`);
+        }
+
+        async function addItem() {
+            const name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            const category = document.getElementById('p-cat').value;
+            const file = document.getElementById('p-photo').files[0];
+            if(!name || !price) return alert("Details bharo!");
+
+            if(file) {
+                const r = new FileReader();
+                r.onloadend = async () => {
+                    await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, category, image: r.result }) });
+                    location.reload();
+                };
+                r.readAsDataURL(file);
+            } else {
+                await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, category }) });
+                location.reload();
+            }
         }
 
         loadItems();
