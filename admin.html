@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annapurna Admin | Blinkit Style</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 font-sans pb-10">
+
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 z-[1000] flex items-center justify-center p-6">
+        <div class="bg-white p-8 rounded-[40px] w-full max-w-sm text-center shadow-2xl">
+            <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-lock text-green-600 text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-black mb-2 text-slate-800">Admin Access</h1>
+            <p class="text-gray-400 text-sm mb-6 font-bold">Annapurna Daily Mart Portal</p>
+            <input id="admin-pass" type="password" placeholder="Enter Secret Code" class="w-full p-4 bg-gray-100 rounded-2xl mb-4 text-center font-black outline-none border-2 border-transparent focus:border-green-500">
+            <button onclick="checkPass()" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black shadow-lg">UNLOCK DASHBOARD</button>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <header class="bg-white p-6 shadow-sm sticky top-0 z-50 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-black text-slate-800 italic">Annapurna Admin</h1>
+                <p class="text-[10px] font-black text-green-600 uppercase tracking-widest">Store Manager Mode</p>
+            </div>
+            <button onclick="location.reload()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold text-xs">LOGOUT</button>
+        </header>
+
+        <div class="p-6 grid grid-cols-2 gap-4">
+            <div class="bg-green-600 p-5 rounded-[30px] text-white shadow-lg">
+                <p class="text-[10px] font-bold opacity-80 uppercase">Total Items</p>
+                <h2 id="stat-total" class="text-3xl font-black">0</h2>
+            </div>
+        </div>
+
+        <div class="px-6 mb-8">
+            <div class="bg-white p-6 rounded-[35px] shadow-sm border">
+                <h3 class="font-black text-lg mb-4 italic">Add New Product</h3>
+                <div class="space-y-4">
+                    <input id="p-name" type="text" placeholder="Item Name" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border outline-none">
+                    <div class="grid grid-cols-2 gap-4">
+                        <input id="p-price" type="number" placeholder="Price" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border outline-none">
+                        <select id="p-cat" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border outline-none">
+                            <option value="Grocery & Kitchen">Grocery & Kitchen</option>
+                            <option value="Snacks & Drinks">Snacks & Drinks</option>
+                            <option value="Personal Care">Personal Care</option>
+                            <option value="Household">Household</option>
+                        </select>
+                    </div>
+                    <label class="block bg-slate-100 p-4 rounded-2xl border-2 border-dashed text-center">
+                        <span class="text-xs font-black text-gray-500">UPLOAD PHOTO</span>
+                        <input id="p-img" type="file" accept="image/*" class="hidden">
+                    </label>
+                    <button id="add-btn" onclick="uploadItem()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black shadow-xl">PUBLISH ITEM</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="px-6">
+            <h3 class="font-black text-lg mb-4 italic text-slate-800">Inventory</h3>
+            <div id="inventory-list" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <script>
+        const db = "https://kirana-pro-default-rtdb.firebaseio.com/.json";
+
+        function checkPass() {
+            if(document.getElementById('admin-pass').value === "Harshit@123") {
+                document.getElementById('login-screen').remove();
+                document.getElementById('dashboard').classList.remove('hidden');
+                loadInventory();
+            } else { alert("Wrong Password!"); }
+        }
+
+        async function loadInventory() {
+            const res = await fetch(db);
+            const data = await res.json() || {};
+            const list = document.getElementById('inventory-list');
+            list.innerHTML = "";
+            let count = 0;
+            for(let id in data) {
+                count++;
+                list.innerHTML += `
+                <div class="bg-white p-4 rounded-3xl shadow-sm border flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <img src="${data[id].image || ''}" class="w-12 h-12 rounded-xl object-contain border">
+                        <div><p class="font-black text-sm">${data[id].name}</p><p class="text-[10px] font-bold text-gray-400 uppercase">₹${data[id].price}</p></div>
+                    </div>
+                    <button onclick="deleteItem('${id}')" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
+                </div>`;
+            }
+            document.getElementById('stat-total').innerText = count;
+        }
+
+        async function uploadItem() {
+            const btn = document.getElementById('add-btn');
+            const name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            const category = document.getElementById('p-cat').value;
+            const file = document.getElementById('p-img').files[0];
+            if(!name || !price) return;
+            btn.innerText = "Uploading..."; btn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, category, image: reader.result }) });
+                location.reload();
+            };
+            if(file) reader.readAsDataURL(file);
+            else { await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, category }) }); location.reload(); }
+        }
+
+        async function deleteItem(id) {
+            if(confirm("Hata de?")) {
+                await fetch(`https://kirana-pro-default-rtdb.firebaseio.com/${id}.json`, { method: 'DELETE' });
+                loadInventory();
+            }
+        }
+    </script>
+</body>
+</html>
