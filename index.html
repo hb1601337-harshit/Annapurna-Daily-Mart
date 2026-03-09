@@ -6,60 +6,129 @@
     <title>Annapurna Daily Mart</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        .product-card { border-radius: 15px; overflow: hidden; transition: 0.3s; }
+        .product-card:active { transform: scale(0.95); }
+    </style>
 </head>
-<body class="bg-gray-100 pb-24">
+<body class="bg-gray-100 pb-32">
 
     <div id="admin-box" class="hidden bg-slate-900 text-white p-5 fixed inset-0 z-[100] overflow-y-auto">
         <h2 class="text-xl font-bold mb-4">Admin Control Center</h2>
-        <input id="p-name" type="text" placeholder="Item Name" class="w-full p-2 mb-2 text-black">
-        <input id="p-price" type="number" placeholder="Price" class="w-full p-2 mb-2 text-black">
-        <button onclick="addItem()" class="bg-green-500 w-full p-2 font-bold mb-4">Add Item</button>
-        <hr class="my-4">
-        <input id="announcement" type="text" placeholder="Customer Message (Notice)" class="w-full p-2 mb-2 text-black">
-        <button onclick="setNotice()" class="bg-blue-500 w-full p-2 font-bold">Update Notice</button>
-        <button onclick="closeAdmin()" class="mt-10 text-red-400">Close Admin</button>
+        <input id="p-name" type="text" placeholder="Item Name (e.g. Aata 5kg)" class="w-full p-2 mb-2 text-black rounded">
+        <input id="p-price" type="number" placeholder="Price (₹)" class="w-full p-2 mb-2 text-black rounded">
+        <button onclick="addItem()" class="bg-green-500 w-full p-3 font-bold mb-4 rounded shadow-lg">Add Item To Shop</button>
+        <hr class="my-4 border-slate-700">
+        <input id="announcement" type="text" placeholder="Notice (e.g. Shop is Closed)" class="w-full p-2 mb-2 text-black rounded">
+        <button onclick="setNotice()" class="bg-blue-500 w-full p-3 font-bold rounded shadow-lg">Update Notice Bar</button>
+        <button onclick="closeAdmin()" class="mt-10 w-full text-center text-red-400 font-bold border border-red-400 p-2 rounded">Close Admin Panel</button>
     </div>
 
-    <header class="bg-green-600 p-4 text-white shadow-lg flex justify-between">
-        <h1 onclick="openAdmin()" class="font-black italic">Annapurna Daily Mart</h1>
-        <div id="status-dot" class="h-3 w-3 bg-red-500 rounded-full animate-pulse"></div>
+    <header class="bg-green-600 p-4 text-white shadow-lg flex justify-between items-center sticky top-0 z-50">
+        <h1 onclick="openAdmin()" class="font-black italic text-lg tracking-wider">ANNAPURNA DAILY MART 🛒</h1>
+        <div id="status-dot" class="h-3 w-3 bg-green-400 rounded-full animate-pulse shadow-[0_0_10px_#4ade80]"></div>
     </header>
-    <div id="notice-bar" class="bg-yellow-100 p-2 text-xs text-center font-bold text-red-600">
-        Loading latest updates...
+
+    <div id="notice-bar" class="bg-yellow-100 p-2 text-[11px] text-center font-bold text-red-600 border-b border-yellow-200">
+        Khushamdeed! Fresh items available daily.
     </div>
 
-    <div id="products" class="p-4 grid grid-cols-2 gap-4"></div>
+    <div id="products" class="p-4 grid grid-cols-2 gap-4">
+        <p id="loading-text" class="col-span-2 text-center text-gray-400 py-10">Loading items...</p>
+    </div>
 
-    <div id="tracker" class="m-4 p-4 bg-white rounded-xl shadow-inner border-2 border-dashed border-green-300">
-        <p class="text-[10px] font-bold text-gray-400 uppercase">Current Order Status</p>
-        <div class="flex justify-between mt-2">
-            <span id="step1" class="text-[10px] opacity-30 text-green-700">Packed</span>
-            <span id="step2" class="text-[10px] opacity-30 text-green-700">On Way</span>
-            <span id="step3" class="text-[10px] opacity-30 text-green-700">Delivered</span>
+    <div id="tracker" class="m-4 p-4 bg-white rounded-xl shadow-md border border-green-100">
+        <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Order Status</p>
+        <div class="flex justify-between items-center">
+            <div class="flex flex-col items-center"><div id="step1" class="h-2 w-10 bg-gray-200 rounded"></div><span class="text-[9px] mt-1">Packed</span></div>
+            <div class="flex flex-col items-center"><div id="step2" class="h-2 w-10 bg-gray-200 rounded"></div><span class="text-[9px] mt-1">On Way</span></div>
+            <div class="flex flex-col items-center"><div id="step3" class="h-2 w-10 bg-gray-200 rounded"></div><span class="text-[9px] mt-1">Delivered</span></div>
         </div>
     </div>
 
-    <div id="checkout" class="fixed bottom-0 w-full bg-white p-4 border-t hidden">
-        <div id="qrcode" class="flex justify-center mb-2"></div>
+    <div id="checkout" class="fixed bottom-0 w-full bg-white p-4 border-t shadow-[0_-5px_15px_rgba(0,0,0,0.05)] hidden">
+        <div id="qrcode" class="flex justify-center mb-4 p-2 bg-white inline-block mx-auto rounded shadow-sm border"></div>
         <div class="flex justify-between items-center">
-            <p id="total" class="text-xl font-bold">Total: ₹0</p>
-            <button onclick="sendOrderWA()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold">Place Order</button>
+            <div>
+                <p id="total" class="text-xl font-black text-green-700">Total: ₹0</p>
+                <p class="text-[10px] text-gray-400 italic">Scan QR to pay instantly</p>
+            </div>
+            <button onclick="sendOrderWA()" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg transition">Order on WhatsApp</button>
         </div>
     </div>
 
     <script>
-        const db = "https://kirana-pro-default-rtdb.firebaseio.com/"; 
-        let cart = []; let totalAmt = 0;
+        const db = "https://kirana-pro-default-rtdb.firebaseio.com/.json"; 
+        let cart = []; 
+        let totalAmt = 0;
 
-        function openAdmin() { if(prompt("Pass?") === "Harshit@123") document.getElementById('admin-box').classList.remove('hidden'); }
+        // Admin Auth
+        function openAdmin() { 
+            let pass = prompt("Enter Admin Password:");
+            if(pass === "Harshit@123") {
+                document.getElementById('admin-box').classList.remove('hidden');
+            } else {
+                alert("Wrong Password!");
+            }
+        }
         function closeAdmin() { document.getElementById('admin-box').classList.add('hidden'); }
+
+        // Fetch Items from Firebase
+        async function loadItems() {
+            try {
+                const res = await fetch(db);
+                const data = await res.json();
+                const container = document.getElementById('products');
+                container.innerHTML = "";
+                
+                if(!data) {
+                    container.innerHTML = "<p class='col-span-2 text-center text-gray-400'>No items in shop yet.</p>";
+                    return;
+                }
+
+                for(let id in data) {
+                    if(data[id].name && data[id].price) {
+                        container.innerHTML += `
+                            <div class="product-card bg-white p-3 shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                                <div class="w-full h-24 bg-gray-50 mb-2 rounded flex items-center justify-center text-2xl">📦</div>
+                                <h3 class="font-bold text-gray-800 text-sm">${data[id].name}</h3>
+                                <p class="text-green-600 font-bold mb-2 text-sm">₹${data[id].price}</p>
+                                <button onclick="addToCart('${data[id].name}', ${data[id].price})" class="bg-green-100 text-green-700 text-xs font-bold w-full py-2 rounded-lg hover:bg-green-600 hover:text-white transition">ADD +</button>
+                            </div>
+                        `;
+                    }
+                }
+            } catch (e) { console.log("Error loading items"); }
+        }
+
+        // Add Item to Firebase
+        async function addItem() {
+            const name = document.getElementById('p-name').value;
+            const price = document.getElementById('p-price').value;
+            if(!name || !price) return alert("Bhai naam aur price toh daalo!");
+
+            await fetch(db, {
+                method: 'POST',
+                body: JSON.stringify({ name: name, price: price })
+            });
+            alert("Samaan Add Ho Gaya!");
+            location.reload();
+        }
+
+        // Set Notice Bar
+        async function setNotice() {
+            const txt = document.getElementById('announcement').value;
+            alert("Notice updated! (Feature connecting...)");
+            document.getElementById('notice-bar').innerText = txt;
+            closeAdmin();
+        }
 
         // QR Code Generator (UPI)
         function generateQR(amt) {
             document.getElementById('qrcode').innerHTML = "";
             new QRCode(document.getElementById("qrcode"), {
-                text: `upi://pay?pa=harshitb357-1@okhdfcbank&pn=Annapurna Daily Mart&am=${amt}&cu=INR`,
-                width: 128, height: 128
+                text: `upi://pay?pa=harshitb357-1@okhdfcbank&pn=AnnapurnaDailyMart&am=${amt}&cu=INR`,
+                width: 140, height: 140
             });
         }
 
@@ -72,12 +141,18 @@
             generateQR(totalAmt);
         }
 
+        // Send Order to WhatsApp
         function sendOrderWA() {
-            let msg = "Order Details:\n";
-            cart.forEach(i => msg += `- ${i.n}: ₹${i.p}\n`);
-            msg += `\nTotal: ₹${totalAmt}\nAddress: [SHARING LOCATION]`;
+            if(cart.length === 0) return alert("Pehle kuch kharid toh lo!");
+            let msg = "*🛒 NEW ORDER - ANNAPURNA DAILY MART*\n\n";
+            cart.forEach((i, index) => msg += `${index+1}. ${i.n} - ₹${i.p}\n`);
+            msg += `\n*TOTAL BILL: ₹${totalAmt}*\n\n📍 _Please share your live location now._`;
             window.open(`https://wa.me/919799856807?text=${encodeURIComponent(msg)}`);
         }
+
+        // Initial Load
+        loadItems();
     </script>
 </body>
 </html>
+
