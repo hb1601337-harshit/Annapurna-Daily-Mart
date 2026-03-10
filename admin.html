@@ -3,67 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Hub | Annapurna Mart</title>
+    <title>Admin Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
-        body { font-family: 'Outfit', sans-serif; background: #f4f7f6; }
-    </style>
 </head>
-<body class="pb-10">
-    <div class="bg-black text-white p-8 rounded-b-[40px] mb-8">
-        <h1 class="text-2xl font-black italic text-yellow-400">Annapurna Admin Hub</h1>
-        <p class="text-[10px] font-bold opacity-60 tracking-widest uppercase">Beawar Logistics Dashboard</p>
+<body class="bg-gray-100 p-5">
+    <div class="bg-black text-yellow-400 p-6 rounded-3xl mb-6 shadow-xl">
+        <h1 class="text-xl font-black italic">Annapurna Admin Hub</h1>
     </div>
 
-    <div class="px-5 space-y-6">
-        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
-            <h3 class="font-black italic mb-4 text-lg border-b pb-2 text-green-700">Add New Inventory</h3>
-            <div class="space-y-4">
-                <input type="text" id="n" placeholder="Product Name" class="w-full bg-gray-50 p-4 rounded-xl font-bold border-2 border-transparent focus:border-green-600 outline-none">
-                <input type="number" id="p" placeholder="Price (₹)" class="w-full bg-gray-50 p-4 rounded-xl font-bold border-2 border-transparent focus:border-green-600 outline-none">
-                <input type="text" id="i" placeholder="Image Link" class="w-full bg-gray-50 p-4 rounded-xl font-bold border-2 border-transparent focus:border-green-600 outline-none">
-                <button onclick="add()" class="w-full bg-green-700 text-white p-4 rounded-2xl font-black shadow-lg">PUSH TO APP 🚀</button>
-            </div>
-        </div>
-
-        <div id="inv" class="space-y-3">
-            <p class="text-center text-gray-400 font-bold animate-pulse">Syncing Stock...</p>
-        </div>
+    <div class="bg-white p-6 rounded-3xl shadow-sm mb-6">
+        <h3 class="font-bold mb-4">Add New Item</h3>
+        <input type="text" id="n" placeholder="Name" class="w-full bg-gray-50 p-3 rounded-xl mb-3 border outline-none">
+        <input type="number" id="p" placeholder="Price" class="w-full bg-gray-50 p-3 rounded-xl mb-3 border outline-none">
+        <input type="text" id="i" placeholder="Image URL" class="w-full bg-gray-50 p-3 rounded-xl mb-3 border outline-none">
+        <button onclick="add()" class="w-full bg-green-700 text-white p-4 rounded-xl font-black">UPDATE STOCK 🚀</button>
     </div>
+
+    <div id="inv" class="space-y-2"></div>
 
     <script>
-        const db = "https://kirana-pro-default-rtdb.firebaseio.com/";
+        const DB = "https://kirana-pro-default-rtdb.firebaseio.com/";
         async function add() {
             const name = document.getElementById('n').value;
             const price = document.getElementById('p').value;
             const image = document.getElementById('i').value;
-            if(!name || !price) return alert("Details bharo!");
-            const id = "p_" + Date.now();
-            await fetch(db + id + ".json", { method: 'PUT', body: JSON.stringify({name, price, image}) });
+            if(!name || !price) return alert("Bhai details daalo!");
+            await fetch(DB + "p_" + Date.now() + ".json", { method: 'PUT', body: JSON.stringify({name, price, image}) });
             location.reload();
         }
         async function load() {
-            const res = await fetch(db + ".json");
+            const res = await fetch(DB + ".json");
             const data = await res.json() || {};
             const inv = document.getElementById('inv');
             inv.innerHTML = "";
             for(let id in data) {
-                if(id === "settings") continue;
-                inv.innerHTML += `
-                <div class="flex items-center justify-between p-4 bg-white rounded-2xl border shadow-sm">
-                    <div class="flex items-center gap-3">
-                        <img src="${data[id].image}" class="w-10 h-10 object-contain">
-                        <div><p class="text-xs font-black">${data[id].name}</p><p class="text-xs font-bold text-green-700">₹${data[id].price}</p></div>
-                    </div>
-                    <button onclick="del('${id}')" class="text-red-400"><i class="fa-solid fa-trash-can"></i></button>
+                if(id === "orders" || id === "settings") continue;
+                inv.innerHTML += `<div class="bg-white p-4 rounded-xl flex justify-between items-center shadow-sm">
+                    <span class="text-xs font-bold">${data[id].name} - ₹${data[id].price}</span>
+                    <button onclick="del('${id}')" class="text-red-500 font-bold">Delete</button>
                 </div>`;
             }
         }
-        async function del(id) {
-            if(confirm("Hata dein?")) { await fetch(db + id + ".json", { method: 'DELETE' }); load(); }
-        }
+        async function del(id) { if(confirm("Hata dein?")) { await fetch(DB + id + ".json", {method:'DELETE'}); load(); } }
         load();
     </script>
 </body>
