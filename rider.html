@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rider Partner | Annapurna Mart</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #000; color: white; }
+        .order-card { background: #1a1a1a; border: 1px solid #333; border-radius: 24px; padding: 20px; margin-bottom: 16px; }
+        .btn-accept { background: #f7d150; color: black; font-weight: 800; width: 100%; padding: 15px; border-radius: 16px; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-xl font-black text-[#f7d150]">Rider Dashboard</h1>
+            <p class="text-[10px] text-gray-400 uppercase">Beawar Delivery Hub</p>
+        </div>
+        <div class="bg-green-600 h-3 w-3 rounded-full animate-pulse"></div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <div class="bg-[#111] p-4 rounded-2xl border border-gray-800">
+            <p class="text-[9px] text-gray-500 uppercase font-bold">Today's Earnings</p>
+            <h2 class="text-lg font-black italic">₹450</h2>
+        </div>
+        <div class="bg-[#111] p-4 rounded-2xl border border-gray-800">
+            <p class="text-[9px] text-gray-500 uppercase font-bold">Completed</p>
+            <h2 class="text-lg font-black italic">12</h2>
+        </div>
+    </div>
+
+    <h3 class="font-black italic mb-4 text-gray-400">New Orders Nearby</h3>
+    <div id="riderOrderList">
+        <p class="text-center text-gray-600 text-sm py-10 font-bold">Scanning for orders...</p>
+    </div>
+
+    <script>
+        // Rider Logic: Yahan order aayega toh ghanti bajegi
+        const db = "https://kirana-pro-default-rtdb.firebaseio.com/orders.json";
+        
+        async function fetchNewOrders() {
+            try {
+                const res = await fetch(db);
+                const data = await res.json();
+                const list = document.getElementById('riderOrderList');
+                list.innerHTML = "";
+                
+                for(let id in data) {
+                    if(data[id].status === "Pending") {
+                        list.innerHTML += `
+                        <div class="order-card animate-pulse">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="bg-green-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">10 Min Goal</span>
+                                <p class="text-[10px] font-bold text-gray-500">#${id.slice(-4)}</p>
+                            </div>
+                            <h4 class="text-lg font-black mb-1">New Delivery Order</h4>
+                            <p class="text-xs text-gray-400 mb-4 font-bold"><i class="fa-solid fa-location-dot text-red-500"></i> Beawar Hub to Customer</p>
+                            <button onclick="acceptOrder('${id}')" class="btn-accept">ACCEPT & START MAP</button>
+                        </div>`;
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function acceptOrder(id) {
+            alert("Order Accepted! Naviagtion Starting...");
+            // Point 252: Shortest path logic (Google Maps redirect)
+            window.open("https://www.google.com/maps/dir/Beawar+Rajasthan/Your+Location");
+        }
+
+        setInterval(fetchNewOrders, 5000);
+        fetchNewOrders();
+    </script>
+</body>
+</html>
