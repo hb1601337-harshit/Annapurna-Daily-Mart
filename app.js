@@ -1,4 +1,4 @@
-const DB_URL = "https://kirana-pro-default-rtdb.firebaseio.com/.json";
+const DB_URL = "https://kirana-pro-default-rtdb.firebaseio.com/"; // Fixed URL for deeper access
 let cart = {};
 
 // 1. AI TREND ENGINE (Point 201-203, 301)
@@ -14,6 +14,7 @@ function initAI() {
         const msg = trends[Math.floor(Math.random() * trends.length)];
         const toast = document.createElement('div');
         toast.className = "ai-toast bg-white shadow-2xl p-3 rounded-2xl flex items-center gap-3 border mb-3 animate-slide-in";
+        toast.style.cssText = "animation: slideIn 0.5s ease-out; border-left: 4px solid #f7d150;";
         toast.innerHTML = `
             <div class="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center"><i class="fa-solid fa-robot text-xs"></i></div>
             <p class="text-[10px] font-bold text-gray-800">${msg}</p>
@@ -23,16 +24,16 @@ function initAI() {
     }, 12000);
 }
 
-// 2. LOAD PRODUCTS WITH SKELETONS (Point 113, 271, 281)
+// 2. LOAD PRODUCTS (Point 113, 271, 281)
 async function fetchProducts() {
     const grid = document.getElementById('productGrid');
     try {
-        const res = await fetch(DB_URL);
+        const res = await fetch(DB_URL + ".json");
         const data = await res.json() || {};
-        grid.innerHTML = ""; // Remove Skeletons
+        grid.innerHTML = ""; 
 
         for(let id in data) {
-            if(id === "settings") continue;
+            if(id === "settings" || id === "orders") continue;
             grid.innerHTML += `
             <div class="item-card bg-white p-3 rounded-2xl border border-gray-100 product-node" data-name="${data[id].name}">
                 <div class="relative bg-gray-50 rounded-xl mb-3 p-2 h-32 flex items-center justify-center">
@@ -54,7 +55,7 @@ async function fetchProducts() {
 
 // 3. CART SYSTEM (Point 19-27)
 function updateCart(id, name, price, delta) {
-    if (window.navigator.vibrate) window.navigator.vibrate(10); // Haptics (Point 215)
+    if (window.navigator.vibrate) window.navigator.vibrate(10); 
     
     if(!cart[id]) cart[id] = { name, price, qty: 0 };
     cart[id].qty += delta;
@@ -101,15 +102,50 @@ function updateCartUI() {
     document.getElementById('grandTotal').innerText = `₹${total + 2}`;
 }
 
-// 4. CHECKOUT & CONFETTI (Point 28, 289, 300)
-function handleCheckout() {
+// 4. CHECKOUT & RIDER SYNC (Point 251, 289)
+async function handleCheckout() {
+    // Patakhe phutna (Confetti)
     confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0c831f', '#f7d150', '#ffffff'] });
-    setTimeout(() => {
-        let msg = "🚀 *NEW ORDER: ANNAPURNA MART*%0A";
-        for(let id in cart) { msg += `• ${cart[id].name} (${cart[id].qty}x)%0A`; }
-        msg += `%0A💰 *TOTAL: ₹${document.getElementById('grandTotal').innerText}*`;
-        window.open(`https://wa.me/917240362145?text=${msg}`);
-    }, 800);
+
+    const orderId = "ORD-" + Math.floor(1000 + Math.random() * 9000);
+    const orderData = {
+        id: orderId,
+        items: cart,
+        total: document.getElementById('grandTotal').innerText,
+        status: "Pending",
+        customerLocation: "Beawar, Rajasthan",
+        timestamp: new Date().toISOString()
+    };
+
+    // 312 Point Check: Order ko Rider App ke liye Firebase mein save karna
+    try {
+        await fetch(`${DB_URL}orders/${orderId}.json`, {
+            method: 'PUT',
+            body: JSON.stringify(orderData)
+        });
+
+        setTimeout(() => {
+            let msg = `🚀 *ANNAPURNA MART: NEW ORDER*%0A*Order ID:* ${orderId}%0A---------------------------%0A`;
+            for(let id in cart) {
+                msg += `✅ ${cart[id].name} (${cart[id].qty}x)%0A`;
+            }
+            msg += `---------------------------%0A💰 *TOTAL BILL: ${orderData.total}*%0A📍 *Location:* Beawar%0A📦 *Status:* Rider Assigning...`;
+            
+            window.open(`https://wa.me/917240362145?text=${msg}`);
+            
+            // Notification for Customer
+            alert(`Order ${orderId} placed! Rider is being assigned.`);
+            
+            // Reset Cart
+            cart = {};
+            updateCartUI();
+            toggleCart(false);
+            fetchProducts(); // Refresh buttons
+        }, 800);
+
+    } catch (e) {
+        alert("Order failed! Please check internet.");
+    }
 }
 
 function toggleCart(s) {
@@ -128,7 +164,8 @@ document.getElementById('searchInput').addEventListener('keyup', (e) => {
 // START APP
 window.onload = () => {
     setTimeout(() => {
-        document.getElementById('splash').style.transform = 'translateY(-100%)';
+        const splash = document.getElementById('splash');
+        if(splash) splash.style.transform = 'translateY(-100%)';
         fetchProducts();
         initAI();
     }, 2500);
