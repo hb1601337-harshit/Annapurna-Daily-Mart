@@ -1,93 +1,24 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+:root { --blink-green: #0c831f; --blink-yellow: #f7d150; }
+body { font-family: 'Outfit', sans-serif; }
 
-:root {
-    --blink-green: #0c831f;
-    --blink-yellow: #f7d150;
-    --blink-dark: #1c1c1c;
-}
+.glass-header { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); }
+.delivery-badge { background: #000; color: var(--blink-yellow); padding: 5px 10px; border-radius: 10px; font-size: 10px; font-weight: 900; }
+.search-input { width: 100%; background: #f3f4f6; padding: 14px 45px; border-radius: 18px; font-size: 14px; font-weight: 600; border: none; outline: none; }
 
-body {
-    font-family: 'Outfit', sans-serif;
-    -webkit-tap-highlight-color: transparent;
-}
+.promo-banner { background: linear-gradient(135deg, var(--blink-green), #085a15); border-radius: 28px; padding: 25px; color: white; position: relative; overflow: hidden; }
+.promo-title { font-size: 26px; font-weight: 800; font-style: italic; line-height: 1; }
 
-/* PREMIUM INTERIOR (Point 1-10) */
-.glass-header {
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(12px);
-    border-bottom: 0.5px solid #eee;
-}
+.cart-capsule { position: fixed; bottom: 30px; left: 15px; right: 15px; background: var(--blink-green); padding: 15px 20px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1500; box-shadow: 0 10px 30px rgba(12,131,31,0.3); }
+.view-cart-btn { background: white; color: var(--blink-green); padding: 10px 15px; border-radius: 12px; font-weight: 800; font-size: 11px; text-transform: uppercase; }
 
-.delivery-badge {
-    background: black;
-    color: var(--blink-yellow);
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 800;
-    font-style: italic;
-}
-
-.loc-label { font-size: 9px; font-weight: 800; color: #9ca3af; text-transform: uppercase; line-height: 1; }
-.loc-text { font-size: 13px; font-weight: 800; color: #111827; }
-
-.search-input {
-    width: 100%;
-    background: #f3f4f6;
-    padding: 14px 14px 14px 48px;
-    border-radius: 18px;
-    font-size: 14px;
-    font-weight: 600;
-    border: 2px solid transparent;
-    transition: 0.3s;
-}
-
-.search-input:focus { border-color: var(--blink-green); background: white; outline: none; }
-
-.promo-banner {
-    background: linear-gradient(135deg, var(--blink-green), #085a15);
-    border-radius: 32px;
-    padding: 24px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-}
-
-.promo-title { font-size: 28px; font-weight: 800; font-style: italic; line-height: 1; margin-bottom: 12px; }
-
-/* CART & DRAWER (Point 19-23) */
-.cart-capsule {
-    position: fixed; bottom: 100px; left: 16px; right: 16px;
-    background: var(--blink-green);
-    padding: 16px; border-radius: 20px;
-    display: flex; justify-content: space-between; align-items: center;
-    z-index: 1500;
-}
-
-.cart-drawer {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: white; border-radius: 40px 40px 0 0;
-    padding: 24px; z-index: 2000;
-    transform: translateY(100%); transition: transform 0.4s ease;
-}
-
+.cart-drawer { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 35px 35px 0 0; padding: 25px; z-index: 2000; transform: translateY(100%); transition: 0.4s ease; }
 .cart-drawer.open { transform: translateY(0); }
+.drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-blur: 4px; z-index: 1900; }
 
-.checkout-btn {
-    width: 100%; background: var(--blink-green); color: white;
-    padding: 20px; border-radius: 20px; font-weight: 800; font-size: 18px;
-}
+.splash-screen { position: fixed; inset: 0; background: var(--blink-yellow); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.7s; }
+.logo-box { width: 70px; height: 70px; background: #000; color: var(--blink-yellow); border-radius: 20px; display: flex; items-center: center; justify-content: center; font-size: 35px; font-weight: 900; }
 
-/* SPLASH (Point 287) */
-.splash-screen {
-    position: fixed; inset: 0; z-index: 5000;
-    background: var(--blink-yellow);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: 0.7s;
-}
-
-.logo-box {
-    width: 80px; h: 80px; background: black; border-radius: 24px;
-    display: flex; items-center: center; justify-content: center;
-    font-size: 40px; font-weight: 900; font-style: italic;
-}
+/* Point 288: Tracking Card */
+.tracking-card { background: #000; color: white; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #333; }
+.step-active { color: var(--blink-yellow); font-weight: 800; }
