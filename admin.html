@@ -3,158 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Annapurna Admin | Bulk Master</title>
+    <title>Admin Hub | Annapurna Mart</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #f4f7f6; }
+    </style>
 </head>
-<body class="bg-slate-50 font-sans pb-10">
-
-    <div id="login-screen" class="fixed inset-0 bg-slate-900 z-[1000] flex items-center justify-center p-6">
-        <div class="bg-white p-8 rounded-[40px] w-full max-w-sm text-center shadow-2xl">
-            <h1 class="text-2xl font-black mb-6 text-slate-800 italic">Annapurna Admin</h1>
-            <input id="admin-pass" type="password" placeholder="Enter Secret Code" class="w-full p-4 bg-gray-100 rounded-2xl mb-4 text-center font-black outline-none border-2 border-transparent focus:border-green-500">
-            <button onclick="checkPass()" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black shadow-lg">UNLOCK DASHBOARD</button>
-        </div>
+<body class="pb-10">
+    <div class="bg-black text-white p-8 rounded-b-[40px] mb-8">
+        <h1 class="text-2xl font-black italic text-yellow-400">Annapurna Admin Hub</h1>
+        <p class="text-[10px] font-bold opacity-60 tracking-widest uppercase">Beawar Logistics Dashboard</p>
     </div>
 
-    <div id="dashboard" class="hidden">
-        <header class="bg-white p-6 shadow-sm sticky top-0 z-50 flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-black text-slate-800">Admin Panel</h1>
-                <p class="text-[10px] font-black text-green-600 uppercase italic">Control Room</p>
-            </div>
-            <button onclick="location.reload()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl font-bold text-xs">LOGOUT</button>
-        </header>
-
-        <div class="p-6">
-            <div class="bg-blue-600 p-6 rounded-[35px] text-white shadow-xl flex flex-col items-center">
-                <i class="fa-solid fa-bolt text-3xl mb-2"></i>
-                <h3 class="font-black text-lg">Blinkit Magic Upload</h3>
-                <p class="text-xs opacity-80 mb-4 text-center">Ek click mein 50+ items photos ke saath chadhayein</p>
-                <button id="bulk-btn" onclick="importBlinkitData()" class="w-full bg-white text-blue-600 p-4 rounded-2xl font-black shadow-lg active:scale-95 transition">START BULK IMPORT</button>
+    <div class="px-5 space-y-6">
+        <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <h3 class="font-black italic mb-4 text-lg border-b pb-2 text-green-700">Add New Inventory</h3>
+            <div class="space-y-4">
+                <input type="text" id="n" placeholder="Product Name" class="w-full bg-gray-50 p-4 rounded-xl font-bold border-2 border-transparent focus:border-green-600 outline-none">
+                <input type="number" id="p" placeholder="Price (₹)" class="w-full bg-gray-50 p-4 rounded-xl font-bold border-2 border-transparent focus:border-green-600 outline-none">
+                <input type="text" id="i" placeholder="Image Link" class="w-full bg-gray-50 p-4 rounded-xl font-bold border-2 border-transparent focus:border-green-600 outline-none">
+                <button onclick="add()" class="w-full bg-green-700 text-white p-4 rounded-2xl font-black shadow-lg">PUSH TO APP 🚀</button>
             </div>
         </div>
 
-        <div class="px-6 mb-8">
-            <div class="bg-white p-6 rounded-[35px] shadow-sm border">
-                <h3 class="font-black text-lg mb-4 italic">Add Single Item</h3>
-                <div class="space-y-4">
-                    <input id="p-name" type="text" placeholder="Item Name" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border outline-none">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input id="p-price" type="number" placeholder="Price" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border outline-none">
-                        <select id="p-cat" class="w-full p-4 bg-gray-50 rounded-2xl font-bold border outline-none">
-                            <option value="Grocery & Kitchen">Grocery & Kitchen</option>
-                            <option value="Snacks & Drinks">Snacks & Drinks</option>
-                            <option value="Personal Care">Personal Care</option>
-                            <option value="Household">Household</option>
-                        </select>
-                    </div>
-                    <label class="block bg-slate-100 p-4 rounded-2xl border-2 border-dashed text-center">
-                        <span class="text-xs font-black text-gray-500">PHOTO UPLOAD</span>
-                        <input id="p-img" type="file" accept="image/*" class="hidden">
-                    </label>
-                    <button id="add-btn" onclick="uploadItem()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black shadow-xl">PUBLISH ITEM</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="px-6">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-black text-lg italic text-slate-800">Inventory Management</h3>
-                <span id="stat-total" class="bg-gray-200 px-3 py-1 rounded-full text-xs font-black text-gray-600">0 ITEMS</span>
-            </div>
-            <div id="inventory-list" class="space-y-3"></div>
+        <div id="inv" class="space-y-3">
+            <p class="text-center text-gray-400 font-bold animate-pulse">Syncing Stock...</p>
         </div>
     </div>
 
     <script>
-        const db = "https://kirana-pro-default-rtdb.firebaseio.com/.json";
-
-        function checkPass() {
-            if(document.getElementById('admin-pass').value === "Harshit@123") {
-                document.getElementById('login-screen').remove();
-                document.getElementById('dashboard').classList.remove('hidden');
-                loadInventory();
-            } else { alert("Wrong Password!"); }
+        const db = "https://kirana-pro-default-rtdb.firebaseio.com/";
+        async function add() {
+            const name = document.getElementById('n').value;
+            const price = document.getElementById('p').value;
+            const image = document.getElementById('i').value;
+            if(!name || !price) return alert("Details bharo!");
+            const id = "p_" + Date.now();
+            await fetch(db + id + ".json", { method: 'PUT', body: JSON.stringify({name, price, image}) });
+            location.reload();
         }
-
-        // --- MAGIC BULK DATA ---
-        async function importBlinkitData() {
-            const items = [
-                { name: "Aashirvaad Atta 5kg", price: 295, category: "Grocery & Kitchen", image: "https://www.bigbasket.com/media/uploads/p/l/126906_8-aashirvaad-atta-whole-wheat.jpg" },
-                { name: "Amul Gold Milk 1L", price: 66, category: "Dairy & Breakfast", image: "https://m.media-amazon.com/images/I/71ByX27W9IL._SL1500_.jpg" },
-                { name: "Maggi 4-Pack", price: 60, category: "Snacks & Drinks", image: "https://m.media-amazon.com/images/I/8109m-S6pOL._SL1500_.jpg" },
-                { name: "Tata Salt 1kg", price: 28, category: "Grocery & Kitchen", image: "https://m.media-amazon.com/images/I/61N9p7X6SJL._SL1500_.jpg" },
-                { name: "Fortune Oil 1L", price: 145, category: "Grocery & Kitchen", image: "https://m.media-amazon.com/images/I/61y8S3K+f4L._SL1200_.jpg" },
-                { name: "Lay's Classic", price: 20, category: "Snacks & Drinks", image: "https://m.media-amazon.com/images/I/81vNn6p-O1L._SL1500_.jpg" },
-                { name: "Surf Excel 1kg", price: 215, category: "Household", image: "https://m.media-amazon.com/images/I/619SndT0WFL._SL1000_.jpg" },
-                { name: "Colgate Paste", price: 55, category: "Personal Care", image: "https://m.media-amazon.com/images/I/61M40m1A7TL._SL1500_.jpg" },
-                { name: "Dettol Soap", price: 35, category: "Personal Care", image: "https://m.media-amazon.com/images/I/61EExm2j8+L._SL1000_.jpg" },
-                { name: "Britannia Parle-G", price: 10, category: "Snacks & Drinks", image: "https://m.media-amazon.com/images/I/71Vf-M93-mL._SL1500_.jpg" }
-            ];
-
-            if(confirm("Bhai, kya aap 10 main items ek saath chadhana chahte ho?")) {
-                const btn = document.getElementById('bulk-btn');
-                btn.innerText = "Processing Magic...";
-                btn.disabled = true;
-
-                for(let itm of items) {
-                    await fetch(db, { method: 'POST', body: JSON.stringify(itm) });
-                }
-                alert("Done! Dukaan bhar gayi. Ab rates check kar lo.");
-                location.reload();
-            }
-        }
-
-        async function loadInventory() {
-            const res = await fetch(db);
+        async function load() {
+            const res = await fetch(db + ".json");
             const data = await res.json() || {};
-            const list = document.getElementById('inventory-list');
-            list.innerHTML = "";
-            let count = 0;
+            const inv = document.getElementById('inv');
+            inv.innerHTML = "";
             for(let id in data) {
-                count++;
-                list.innerHTML += `
-                <div class="bg-white p-4 rounded-3xl shadow-sm border flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <img src="${data[id].image || ''}" class="w-12 h-12 rounded-xl object-contain border">
-                        <div>
-                            <p class="font-black text-sm">${data[id].name}</p>
-                            <p class="text-[10px] font-bold text-gray-400">₹${data[id].price}</p>
-                        </div>
+                if(id === "settings") continue;
+                inv.innerHTML += `
+                <div class="flex items-center justify-between p-4 bg-white rounded-2xl border shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <img src="${data[id].image}" class="w-10 h-10 object-contain">
+                        <div><p class="text-xs font-black">${data[id].name}</p><p class="text-xs font-bold text-green-700">₹${data[id].price}</p></div>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="deleteItem('${id}')" class="text-red-500 p-2"><i class="fa-solid fa-trash"></i></button>
-                    </div>
+                    <button onclick="del('${id}')" class="text-red-400"><i class="fa-solid fa-trash-can"></i></button>
                 </div>`;
             }
-            document.getElementById('stat-total').innerText = count + " ITEMS";
         }
-
-        async function uploadItem() {
-            const btn = document.getElementById('add-btn');
-            const name = document.getElementById('p-name').value;
-            const price = document.getElementById('p-price').value;
-            const category = document.getElementById('p-cat').value;
-            const file = document.getElementById('p-img').files[0];
-            if(!name || !price) return;
-            btn.innerText = "Uploading..."; btn.disabled = true;
-
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, category, image: reader.result }) });
-                location.reload();
-            };
-            if(file) reader.readAsDataURL(file);
-            else { await fetch(db, { method: 'POST', body: JSON.stringify({ name, price, category }) }); location.reload(); }
+        async function del(id) {
+            if(confirm("Hata dein?")) { await fetch(db + id + ".json", { method: 'DELETE' }); load(); }
         }
-
-        async function deleteItem(id) {
-            if(confirm("Hata dein?")) {
-                await fetch(`https://kirana-pro-default-rtdb.firebaseio.com/${id}.json`, { method: 'DELETE' });
-                loadInventory();
-            }
-        }
+        load();
     </script>
 </body>
 </html>
