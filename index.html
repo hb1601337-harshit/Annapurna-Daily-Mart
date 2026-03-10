@@ -9,12 +9,10 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-gray-50/50 overflow-x-hidden">
-
+<body class="bg-gray-50/50">
     <div id="splash" class="splash-screen">
-        <div class="logo-box animate-bounce text-[#f7d150]">A</div>
+        <div class="logo-box animate-bounce">A</div>
         <h1 class="splash-text">Annapurna Mart</h1>
-        <div class="loading-bar"><div class="progress"></div></div>
     </div>
 
     <div id="aiNotifier" class="fixed top-24 right-4 z-[2000]"></div>
@@ -25,49 +23,32 @@
                 <div class="delivery-badge">10 MINS</div>
                 <div class="location-box">
                     <p class="loc-label">Delivering to</p>
-                    <p class="loc-text">Beawar, Rajasthan <i class="fa-solid fa-chevron-down"></i></p>
+                    <p class="loc-text">Beawar, Rajasthan <i class="fa-solid fa-chevron-down text-[8px]"></i></p>
                 </div>
             </div>
-            <div class="header-icons flex items-center gap-3">
-                <div class="security-tag"><i class="fa-solid fa-shield-halved"></i> SECURE</div>
-                <div class="user-profile"><i class="fa-regular fa-user"></i></div>
-            </div>
+            <div class="user-profile"><i class="fa-regular fa-user"></i></div>
         </div>
-        <div class="search-container relative">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="searchInput" placeholder="Search 'atta', 'chips', 'milk'..." class="search-input">
-            <i class="fa-solid fa-microphone voice-icon" onclick="startVoiceSearch()"></i>
+        <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input type="text" id="searchInput" placeholder="Search 'chips', 'milk'..." class="search-input">
+            <i class="fa-solid fa-microphone absolute right-4 top-1/2 -translate-y-1/2 text-green-600 cursor-pointer" onclick="alert('Voice Search Active')"></i>
         </div>
     </header>
 
     <main class="p-4 pb-32">
-        <div class="promo-banner" id="mainBanner">
-            <div class="relative z-10">
-                <p class="promo-sub">Annapurna Exclusive</p>
-                <h3 class="promo-title">FREE DELIVERY<br>ON ALL ORDERS</h3>
-                <button class="promo-btn">Shop Now</button>
-            </div>
-            <i class="fa-solid fa-bolt banner-bg-icon"></i>
+        <div class="promo-banner mb-6" id="mainBanner">
+            <h3 class="promo-title">FREE DELIVERY<br>TODAY!</h3>
+            <span class="bg-white text-green-700 px-3 py-1 rounded-full text-[10px] font-black uppercase">Valid in Beawar Only</span>
         </div>
 
-        <div class="category-grid no-scrollbar flex gap-4 overflow-x-auto py-2 mb-6">
-            </div>
-
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="section-title">Bestsellers in Beawar</h2>
-            <span class="see-all">See All <i class="fa-solid fa-arrow-right"></i></span>
-        </div>
-        <div id="productGrid" class="grid grid-cols-2 gap-4">
-            </div>
+        <h2 class="font-black italic text-lg mb-4">Daily Essentials</h2>
+        <div id="productGrid" class="grid grid-cols-2 gap-4"></div>
     </main>
 
-    <div id="cartBar" class="cart-capsule hidden shadow-2xl">
-        <div class="flex items-center gap-3">
-            <div class="cart-icon-box"><i class="fa-solid fa-bag-shopping"></i></div>
-            <div>
-                <p id="cQty" class="cart-qty-text">0 ITEMS</p>
-                <p id="cPrice" class="cart-price-text">₹0</p>
-            </div>
+    <div id="cartBar" class="cart-capsule hidden">
+        <div class="flex items-center gap-3 text-white">
+            <div id="cQty" class="font-black text-xs bg-white/20 p-2 rounded-lg">0 ITEMS</div>
+            <p id="cPrice" class="font-black text-lg italic">₹0</p>
         </div>
         <button onclick="toggleCart(true)" class="view-cart-btn">View Cart <i class="fa-solid fa-chevron-right"></i></button>
     </div>
@@ -75,22 +56,13 @@
     <div id="overlay" class="drawer-overlay hidden" onclick="toggleCart(false)"></div>
     <div id="cartDrawer" class="cart-drawer">
         <div class="drawer-handle"></div>
-        <h2 class="drawer-title">Review Items</h2>
-        <div id="cartItemsList" class="cart-items-list no-scrollbar"></div>
-        <div class="bill-summary">
-            <p class="bill-label">Bill Summary</p>
-            <div class="bill-row"><span>Subtotal</span><span id="subTotal">₹0</span></div>
-            <div class="bill-row text-blue-600"><span>Delivery Charge</span><span>FREE</span></div>
-            <div class="bill-row total-row"><span>To Pay</span><span id="grandTotal">₹0</span></div>
+        <div id="trackingUI"></div> <h2 class="drawer-title">Review Items</h2>
+        <div id="cartItemsList" class="space-y-3 mb-6"></div>
+        <div class="bill-summary mb-6">
+            <div class="flex justify-between font-black text-lg italic pt-2 border-t"><span>To Pay</span><span id="grandTotal">₹0</span></div>
         </div>
-        <button onclick="handleCheckout()" class="checkout-btn">Proceed to Pay <i class="fa-solid fa-arrow-right"></i></button>
+        <button onclick="handleCheckout()" id="checkoutBtn" class="checkout-btn">Place Order 🚀</button>
     </div>
-
-    <nav class="bottom-nav">
-        <div class="nav-item active"><i class="fa-solid fa-house"></i><span>Home</span></div>
-        <div class="nav-item"><i class="fa-solid fa-layer-group"></i><span>Categories</span></div>
-        <div class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></div>
-    </nav>
 
     <script src="app.js"></script>
 </body>
