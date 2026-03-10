@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+
+:root {
+    --blink-green: #0c831f;
+    --blink-yellow: #f7d150;
+    --blink-dark: #1c1c1c;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* PREMIUM INTERIOR (Point 1-10) */
+.glass-header {
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 0.5px solid #eee;
+}
+
+.delivery-badge {
+    background: black;
+    color: var(--blink-yellow);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 800;
+    font-style: italic;
+}
+
+.loc-label { font-size: 9px; font-weight: 800; color: #9ca3af; text-transform: uppercase; line-height: 1; }
+.loc-text { font-size: 13px; font-weight: 800; color: #111827; }
+
+.search-input {
+    width: 100%;
+    background: #f3f4f6;
+    padding: 14px 14px 14px 48px;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 2px solid transparent;
+    transition: 0.3s;
+}
+
+.search-input:focus { border-color: var(--blink-green); background: white; outline: none; }
+
+.promo-banner {
+    background: linear-gradient(135deg, var(--blink-green), #085a15);
+    border-radius: 32px;
+    padding: 24px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.promo-title { font-size: 28px; font-weight: 800; font-style: italic; line-height: 1; margin-bottom: 12px; }
+
+/* CART & DRAWER (Point 19-23) */
+.cart-capsule {
+    position: fixed; bottom: 100px; left: 16px; right: 16px;
+    background: var(--blink-green);
+    padding: 16px; border-radius: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 1500;
+}
+
+.cart-drawer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: white; border-radius: 40px 40px 0 0;
+    padding: 24px; z-index: 2000;
+    transform: translateY(100%); transition: transform 0.4s ease;
+}
+
+.cart-drawer.open { transform: translateY(0); }
+
+.checkout-btn {
+    width: 100%; background: var(--blink-green); color: white;
+    padding: 20px; border-radius: 20px; font-weight: 800; font-size: 18px;
+}
+
+/* SPLASH (Point 287) */
+.splash-screen {
+    position: fixed; inset: 0; z-index: 5000;
+    background: var(--blink-yellow);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: 0.7s;
+}
+
+.logo-box {
+    width: 80px; h: 80px; background: black; border-radius: 24px;
+    display: flex; items-center: center; justify-content: center;
+    font-size: 40px; font-weight: 900; font-style: italic;
+}
